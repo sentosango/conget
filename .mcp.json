@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "conget": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "conget",
+        "mcp"
+      ],
+      "env": {}
+    }
+  }
+}
