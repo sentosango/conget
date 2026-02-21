@@ -10,6 +10,7 @@ dependencies = [
     "requests>=2.31.0",
     "markdownify>=0.11.6",
     "tomlkit>=0.14.0",
+    "yt-dlp>=2026.2.4",
 ]
 
 [project.scripts]
@@ -21,6 +22,7 @@ conget-default = "src.fetchers.default:cli"
 conget-github-repo = "src.fetchers.github_repo:cli"
 conget-hh-vacancy = "src.fetchers.hh_vacancy:cli"
 conget-hh-employer = "src.fetchers.hh_employer:cli"
+conget-youtube-video = "src.fetchers.youtube_video:cli"
 
 # Fetcher entry points (for plugins)
 [project.entry-points."conget.fetchers"]
@@ -28,6 +30,7 @@ default = "src.fetchers.default:DefaultFetcher"
 github-repo = "src.fetchers.github_repo:GitHubRepoFetcher"
 hh-vacancy = "src.fetchers.hh_vacancy:HHVacancyFetcher"
 hh-employer = "src.fetchers.hh_employer:HHEmployerFetcher"
+youtube-video = "src.fetchers.youtube_video:YoutubeVideoFetcher"
 
 [build-system]
 requires = ["hatchling"]

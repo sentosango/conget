@@ -10,9 +10,10 @@ Conget — простая CLI библиотека для получения в�
   - `github-repo` — README.md из GitHub репозиториев
   - `hh-vacancy` — вакансии с HH.ru через официальный API
   - `hh-employer` — информация о работодателях с HH.ru
+  - `youtube-video` — метаданные YouTube видео (yt-dlp)
 - **Несколько форматов вывода:** html, markdown, text, json, xmltei, csv
 - **Единая CLI:** `conget fetch/analyze/list/mcp` с автоматическим выбором фетчера
-- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`
+- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`, `conget-youtube-video`
 - **MCP сервер:** интеграция с AI-агентами через Model Context Protocol (stdio transport)
 - **Плагины сторонних разработчиков:** через Python entry-points
 - **Централизованная конфигурация:** `~/.config/conget/config.toml` с автосозданием
@@ -25,7 +26,7 @@ Conget — простая CLI библиотека для получения в�
 - **Installation:** `uv tool install .` (global CLI tools)
 - **Dependency Manager:** uv
 - **Package Manager:** pyproject.toml (hatchling build backend)
-- **Content Extraction:** trafilatura
+- **Content Extraction:** trafilatura, yt-dlp
 - **MCP Protocol:** mcp (stdio transport)
 - **Config Format:** TOML (tomlkit for parsing)
 - **HTTP Client:** requests (for API fetchers), trafilatura (for web fetchers)
@@ -76,7 +77,8 @@ Conget — простая CLI библиотека для получения в�
 │       ├── default.py         # DefaultFetcher + CLI
 │       ├── github_repo.py     # GitHubRepoFetcher + CLI
 │       ├── hh_vacancy.py     # HHVacancyFetcher + CLI
-│       └── hh_employer.py    # HHEmployerFetcher + CLI
+│       ├── hh_employer.py    # HHEmployerFetcher + CLI
+│       └── youtube_video.py  # YoutubeVideoFetcher + CLI
 ```
 
 ### Фетчеры
@@ -103,6 +105,13 @@ Conget — простая CLI библиотека для получения в�
 - Форматы: markdown, text, json
 - Использует официальный API HH.ru
 - Опции: timeout
+
+#### YoutubeVideoFetcher
+- Обрабатывает YouTube видео (youtube.com/watch, youtu.be, youtube.com/embed, youtube.com/v)
+- Форматы: markdown, text, json
+- Извлекает метаданные: id, title, description, duration, view_count, like_count, upload_date, channel, tags
+- Использует yt-dlp без скачивания видео
+- Опции: lang (язык метаданных, по умолчанию "en")
 
 ### Exceptions
 - `CongetError` — базовый класс для всех ошибок

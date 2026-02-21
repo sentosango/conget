@@ -17,13 +17,13 @@
 
 ### Phase 1: Dependencies
 
-- [ ] **Task #1**: Добавить yt-dlp в зависимости pyproject.toml
+- [x] **Task #1**: Добавить yt-dlp в зависимости pyproject.toml
   - Файл: `pyproject.toml`
   - Добавить `yt-dlp` в dependencies
 
 ### Phase 2: Implementation
 
-- [ ] **Task #2**: Создать YoutubeVideoFetcher в src/fetchers/youtube_video.py
+- [x] **Task #2**: Создать YoutubeVideoFetcher в src/fetchers/youtube_video.py
   - Файл: `src/fetchers/youtube_video.py`
   - Зависит от: Task #1
   - Класс YoutubeVideoFetcher наследует BaseFetcher
@@ -37,14 +37,14 @@
 
 ### Phase 3: Registration
 
-- [ ] **Task #3**: Зарегистрировать youtube-video в entry-points pyproject.toml
+- [x] **Task #3**: Зарегистрировать youtube-video в entry-points pyproject.toml
   - Файл: `pyproject.toml`
   - CLI script: conget-youtube-video
   - Entry-point: youtube-video
 
 ### Phase 4: Documentation
 
-- [ ] **Task #4**: Обновить DESCRIPTION.md с новым фетчером
+- [x] **Task #4**: Обновить DESCRIPTION.md с новым фетчером
   - Файл: `.ai-factory/DESCRIPTION.md`
   - Зависит от: Task #2
   - Добавить описание YoutubeVideoFetcher
