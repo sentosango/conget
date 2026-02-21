@@ -70,18 +70,18 @@
 
 #### Task 6: Добавить --cache-ttl в CLI
 - **Blocked by:** Task 5
-- **Files:** `src/cli/fetch.py`, `src/cli/main.py`
+- **Files:** `src/cli/fetch.py`, `src/core/interfaces.py`, `src/cli/main.py`
 - **Description:**
-  - Добавить аргумент `--cache-ttl` в CLI
+  - Добавить аргумент `--cache-ttl` в `src/cli/fetch.py`, `src/cli/main.py`
+  - Добавить аргумент `--cache-ttl` в `run_cli()` в interfaces.py для CLI фетчеров
   - `--cache-ttl 0` отключает кэш для запроса
   - Передать значение в fetcher
 
-#### Task 7: Обновить MCP сервер для работы с кэшем
+#### Task 7: Проверить MCP сервер для работы с кэшем
 - **Blocked by:** Task 5
 - **Files:** `src/cli/mcp.py`
 - **Description:**
   - Проверить что MCP использует кэш через BaseFetcher
-  - Опционально: добавить cache_ttl в tool schema
 
 ---
 
@@ -106,7 +106,7 @@ graph TD
     T4[Task 4: Export]
     T5[Task 5: BaseFetcher integration]
     T6[Task 6: CLI --cache-ttl]
-    T7[Task 7: MCP update]
+    T7[Task 7: MCP check]
 
     T1 --> T3
     T2 --> T5
