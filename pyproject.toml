@@ -23,6 +23,7 @@ conget-github-repo = "src.fetchers.github_repo:cli"
 conget-hh-vacancy = "src.fetchers.hh_vacancy:cli"
 conget-hh-employer = "src.fetchers.hh_employer:cli"
 conget-youtube-video = "src.fetchers.youtube_video:cli"
+conget-youtube-playlist = "src.fetchers.youtube_playlist:cli"
 
 # Fetcher entry points (for plugins)
 [project.entry-points."conget.fetchers"]
@@ -31,6 +32,7 @@ github-repo = "src.fetchers.github_repo:GitHubRepoFetcher"
 hh-vacancy = "src.fetchers.hh_vacancy:HHVacancyFetcher"
 hh-employer = "src.fetchers.hh_employer:HHEmployerFetcher"
 youtube-video = "src.fetchers.youtube_video:YoutubeVideoFetcher"
+youtube-playlist = "src.fetchers.youtube_playlist:YoutubePlaylistFetcher"
 
 [build-system]
 requires = ["hatchling"]

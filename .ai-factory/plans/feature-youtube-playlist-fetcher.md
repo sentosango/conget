@@ -17,7 +17,7 @@
 
 ### Phase 1: Implementation
 
-- [ ] **Task #1**: Создать YoutubePlaylistFetcher в src/fetchers/youtube_playlist.py
+- [x] **Task #1**: Создать YoutubePlaylistFetcher в src/fetchers/youtube_playlist.py
   - Файл: `src/fetchers/youtube_playlist.py`
   - Класс YoutubePlaylistFetcher наследует BaseFetcher
   - URL patterns: youtube.com/playlist?list=PLAYLIST_ID (см. полный список в Implementation Notes)
@@ -32,14 +32,14 @@
 
 ### Phase 2: Registration
 
-- [ ] **Task #2**: Зарегистрировать youtube-playlist в entry-points pyproject.toml
+- [x] **Task #2**: Зарегистрировать youtube-playlist в entry-points pyproject.toml
   - Файл: `pyproject.toml`
   - CLI script: conget-youtube-playlist
   - Entry-point: youtube-playlist
 
 ### Phase 3: Documentation
 
-- [ ] **Task #3**: Обновить DESCRIPTION.md с новым фетчером
+- [x] **Task #3**: Обновить DESCRIPTION.md с новым фетчером
   - Файл: `.ai-factory/DESCRIPTION.md`
   - Зависит от: Task #1
   - Добавить описание YoutubePlaylistFetcher
