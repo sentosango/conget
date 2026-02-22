@@ -9,9 +9,11 @@ import logging
 import re
 from typing import Any
 
+import requests
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError, ExtractorError
 
+from src.core.config import get_section_config
 from src.core.exceptions import FetchError, UnsupportedFormatError, ValidationError
 from src.core.formatters import markdown_to_text
 from src.core.interfaces import BaseFetcher
@@ -76,6 +78,10 @@ class YoutubeVideoFetcher(BaseFetcher):
                     default="ru",
                     description="Language for metadata (e.g., 'en', 'ru', 'de')",
                 ),
+                "with_subs": ConfigOption(
+                    default=True,
+                    description="Include subtitles/transcript in output",
+                ),
             },
         )
 
@@ -124,6 +130,23 @@ class YoutubeVideoFetcher(BaseFetcher):
         # Get lang from config (default from metadata)
         lang = self.metadata.config_options["lang"].default
 
+        # Get with_subs from config (default from metadata), convert to boolean
+        config = get_section_config(self.metadata.name)
+        with_subs_raw = config.get("with_subs", None)
+
+        # Convert to boolean, handling TOML string/bool values
+        if with_subs_raw is None:
+            # No config value, use metadata default
+            with_subs = self.metadata.config_options["with_subs"].default
+        elif isinstance(with_subs_raw, bool):
+            # Config value is already bool
+            with_subs = with_subs_raw
+        else:
+            # String or int value from config - convert to bool
+            with_subs = bool(with_subs_raw)
+
+        logger.debug(f"with_subs: raw={with_subs_raw!r}, converted={with_subs}")
+
         # yt-dlp options for metadata extraction only
         ydl_opts = {
             "quiet": True,
@@ -135,6 +158,12 @@ class YoutubeVideoFetcher(BaseFetcher):
                 },
             },
         }
+
+        # Add subtitle extraction if requested
+        if with_subs:
+            ydl_opts["writesubtitles"] = True
+            ydl_opts["subtitleslangs"] = [lang]
+            logger.debug(f"Extracting subtitles with language: {lang}")
 
         logger.debug(f"Extracting metadata with yt-dlp, lang={lang}")
 
@@ -153,7 +182,7 @@ class YoutubeVideoFetcher(BaseFetcher):
             raise FetchError(f"No metadata returned for video {video_id}")
 
         # Extract relevant fields
-        video_data = self._extract_fields(info_dict, video_id, canonical_url)
+        video_data = self._extract_fields(info_dict, video_id, canonical_url, lang, with_subs)
         logger.debug(f"Extracted video data: id={video_data['id']}, title={video_data['title']}")
 
         # Format output
@@ -167,18 +196,20 @@ class YoutubeVideoFetcher(BaseFetcher):
             metadata=video_data,
         )
 
-    def _extract_fields(self, info: dict[str, Any], video_id: str, canonical_url: str) -> dict[str, Any]:
+    def _extract_fields(self, info: dict[str, Any], video_id: str, canonical_url: str, lang: str, with_subs: bool) -> dict[str, Any]:
         """Extract relevant metadata fields from yt-dlp info dict.
 
         Args:
             info: Sanitized info dict from yt-dlp
             video_id: YouTube video ID
             canonical_url: Canonical YouTube URL
+            lang: Priority language for subtitles
+            with_subs: Whether to extract subtitles
 
         Returns:
             Dictionary with extracted metadata
         """
-        return {
+        result = {
             "id": video_id,
             "url": canonical_url,
             "title": info.get("title", ""),
@@ -196,6 +227,105 @@ class YoutubeVideoFetcher(BaseFetcher):
             "thumbnail": info.get("thumbnail", ""),
             "tags": info.get("tags", []),
         }
+
+        # Extract subtitles if requested
+        if with_subs:
+            subtitles = self._extract_subtitles(info, lang)
+            result["subtitles"] = subtitles
+        else:
+            result["subtitles"] = None
+
+        return result
+
+    def _extract_subtitles(self, info: dict[str, Any], lang: str) -> dict[str, Any] | None:
+        """Extract subtitle content from yt-dlp info dict.
+
+        Args:
+            info: Sanitized info dict from yt-dlp
+            lang: Priority language for subtitle extraction
+
+        Returns:
+            Dictionary with lang and text keys, or None if no subtitles found
+        """
+        def _fetch_subtitle_text(url: str) -> str | None:
+            """Fetch subtitle JSON from URL and extract text."""
+            try:
+                response = requests.get(url, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+
+                # Extract text from events structure
+                text_parts = []
+                if "events" in data:
+                    for event in data["events"]:
+                        if "segs" in event:
+                            for seg in event["segs"]:
+                                if "utf8" in seg:
+                                    text_parts.append(seg["utf8"])
+
+                # Join without adding extra spaces - YouTube API already has proper spacing
+                full_text = "".join(text_parts)
+                return full_text if full_text else None
+            except Exception as e:
+                logger.warning(f"Failed to fetch subtitle from URL: {e}")
+                return None
+
+        # Try manual subtitles in preferred language
+        subtitles = info.get("subtitles", {})
+        if lang in subtitles:
+            lang_subtitles = subtitles[lang]
+            if lang_subtitles:
+                subtitle_entry = lang_subtitles[0] if isinstance(lang_subtitles, list) else lang_subtitles
+                if "data" in subtitle_entry:
+                    logger.debug(f"Found manual subtitles in language: {lang}")
+                    return {"lang": lang, "text": subtitle_entry["data"]}
+                elif "url" in subtitle_entry:
+                    text = _fetch_subtitle_text(subtitle_entry["url"])
+                    if text:
+                        logger.debug(f"Found manual subtitles in language: {lang}")
+                        return {"lang": lang, "text": text}
+
+        # Try auto-generated captions in preferred language
+        auto_captions = info.get("automatic_captions", {})
+        if lang in auto_captions:
+            lang_captions = auto_captions[lang]
+            if lang_captions:
+                caption_entry = lang_captions[0] if isinstance(lang_captions, list) else lang_captions
+                if "url" in caption_entry:
+                    text = _fetch_subtitle_text(caption_entry["url"])
+                    if text:
+                        logger.debug(f"Using auto-generated captions in language: {lang}")
+                        return {"lang": lang, "text": text}
+
+        # Try any available manual subtitle
+        if subtitles:
+            first_lang = next(iter(subtitles))
+            if first_lang:
+                first_subtitles = subtitles[first_lang]
+                subtitle_entry = first_subtitles[0] if isinstance(first_subtitles, list) else first_subtitles
+                if "data" in subtitle_entry:
+                    logger.debug(f"Using manual subtitles in language: {first_lang}")
+                    return {"lang": first_lang, "text": subtitle_entry["data"]}
+                elif "url" in subtitle_entry:
+                    text = _fetch_subtitle_text(subtitle_entry["url"])
+                    if text:
+                        logger.debug(f"Using manual subtitles in language: {first_lang}")
+                        return {"lang": first_lang, "text": text}
+
+        # Try any available auto caption
+        if auto_captions:
+            first_lang = next(iter(auto_captions))
+            if first_lang:
+                first_captions = auto_captions[first_lang]
+                caption_entry = first_captions[0] if isinstance(first_captions, list) else first_captions
+                if "url" in caption_entry:
+                    text = _fetch_subtitle_text(caption_entry["url"])
+                    if text:
+                        logger.debug(f"Using auto-generated captions in language: {first_lang}")
+                        return {"lang": first_lang, "text": text}
+
+        logger.debug(f"No subtitles found for video")
+        return None
 
     def _format_output(self, data: dict[str, Any], output_format: str) -> str:
         """Format video data for output.
@@ -233,6 +363,22 @@ class YoutubeVideoFetcher(BaseFetcher):
                 "## Tags",
                 "",
                 ", ".join(data['tags'][:10]),  # Limit to 10 tags
+            ])
+
+        # Add subtitles if present
+        if data.get('subtitles'):
+            subtitles = data['subtitles']
+            # Add blockquote indentation to each line of subtitle text
+            sub_text = subtitles.get('text', '(no text)')
+            indented_text = "\n".join(f"    {line}" for line in sub_text.split("\n") if line.strip())
+
+            lines.extend([
+                "",
+                "## Subtitles",
+                "",
+                f"**Language:** {subtitles.get('lang', 'unknown')}",
+                "",
+                indented_text,
             ])
 
         # Filter out empty lines from optional fields
