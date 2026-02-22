@@ -49,8 +49,11 @@ def main():
     # conget mcp
     subparsers.add_parser("mcp", help="Start MCP server")
 
+    # conget config
+    subparsers.add_parser("config", help="Show and upgrade config file")
+
     # Check if first positional argument is a known command
-    known_commands = {"fetch", "list", "analyze", "mcp"}
+    known_commands = {"fetch", "list", "analyze", "mcp", "config"}
 
     # Find first positional argument (not starting with -)
     first_pos_arg = None
@@ -97,6 +100,9 @@ def main():
     elif args.command == "mcp":
         from src.cli.mcp import run
 
+        run(args)
+    elif args.command == "config":
+        from src.cli.config import run
         run(args)
 
 
