@@ -78,7 +78,7 @@ class YoutubeVideoFetcher(BaseFetcher):
                     description="Language for metadata (e.g., 'en', 'ru', 'de')",
                 ),
                 "with_subs": ConfigOption(
-                    default=True,
+                    default=False,
                     description="Include subtitles/transcript in output",
                 ),
             },
