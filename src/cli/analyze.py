@@ -1,7 +1,7 @@
 """Analyze command for conget CLI."""
 
 import logging
-from typing import Annotated
+from typing import Annotated, List
 
 import typer
 
@@ -11,8 +11,16 @@ from src.core.types import AnalysisResult, ConfigOption, FetcherMatch
 logger = logging.getLogger(__name__)
 
 
+def complete_url(incomplete: str) -> List[str]:
+    """Autocomplete function for URL argument - returns empty list to disable file completion."""
+    return []
+
+
 def analyze(
-    urls: Annotated[list[str], typer.Argument(help="URLs to analyze")],
+    urls: Annotated[
+        list[str],
+        typer.Argument(help="URLs to analyze", autocompletion=complete_url),
+    ],
 ):
     """Execute the analyze command.
 

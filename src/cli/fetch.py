@@ -14,6 +14,27 @@ from src.core.registry import get_fetchers
 logger = logging.getLogger(__name__)
 
 
+def complete_fetcher(incomplete: str) -> List[str]:
+    """Autocomplete function for --fetcher option."""
+    try:
+        fetchers = get_fetchers()
+        return [name for name in fetchers if name.startswith(incomplete)]
+    except Exception:
+        return []
+
+
+def complete_format(incomplete: str) -> List[str]:
+    """Autocomplete function for --format option."""
+    # Common formats across fetchers
+    common_formats = ["markdown", "text", "html", "json"]
+    return [fmt for fmt in common_formats if fmt.startswith(incomplete)]
+
+
+def complete_url(incomplete: str) -> List[str]:
+    """Autocomplete function for URL argument - returns empty list to disable file completion."""
+    return []
+
+
 def select_best_fetcher(
     fetchers: Dict[str, Any], url: str, output_format: str | None = None
 ) -> str:
@@ -84,12 +105,17 @@ def list_available_fetchers(url: str) -> List[Dict[str, Any]]:
 
 
 def fetch(
-    url: Annotated[str, typer.Argument(help="URL to fetch from")],
+    url: Annotated[
+        str,
+        typer.Argument(help="URL to fetch from", autocompletion=complete_url),
+    ],
     fetcher: Annotated[
-        str | None, typer.Option("-F", "--fetcher", help="Specific fetcher to use (default: auto-select)")
+        str | None,
+        typer.Option("-F", "--fetcher", help="Specific fetcher to use (default: auto-select)", autocompletion=complete_fetcher),
     ] = None,
     format: Annotated[
-        str | None, typer.Option("-f", "--format", help="Output format")
+        str | None,
+        typer.Option("-f", "--format", help="Output format", autocompletion=complete_format),
     ] = None,
     list_fetchers: Annotated[
         bool, typer.Option("--list-fetchers", help="List all available fetchers for URL")

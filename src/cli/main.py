@@ -47,6 +47,9 @@ def main_entry():
     # Check if first positional argument is a known command
     known_commands = {"fetch", "list", "analyze", "mcp", "config", "--help", "--version", "--install-completion", "--show-completion"}
 
+    # Check for completion-related flags (skip implicit fetch for these)
+    has_completion_flag = "--install-completion" in sys.argv or "--show-completion" in sys.argv
+
     # Find first positional argument (not starting with -)
     first_pos_arg = None
     for arg in sys.argv[1:]:
@@ -54,8 +57,8 @@ def main_entry():
             first_pos_arg = arg
             break
 
-    # If first arg is not a known command, treat as implicit fetch
-    if first_pos_arg and first_pos_arg not in known_commands:
+    # If first arg is not a known command and no completion flag, treat as implicit fetch
+    if not has_completion_flag and first_pos_arg and first_pos_arg not in known_commands:
         logging.debug(
             f"No command specified, treating '{first_pos_arg}' as URL for implicit fetch"
         )
