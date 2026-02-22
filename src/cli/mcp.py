@@ -10,7 +10,7 @@ from mcp.types import Tool, TextContent
 
 from src.core.registry import get_fetchers
 from src.cli.fetch import select_best_fetcher
-from src.core.config import get_default_format
+from src.core.config import get_default_format, get_default_cache_ttl
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +96,7 @@ async def fetch_url_handler(arguments: Any) -> list[TextContent]:
                 )
             ]
 
-        result = fetcher.fetch(url, output_format)
+        result = fetcher.fetch_with_cache(url, output_format, cache_ttl=get_default_cache_ttl())
         return [TextContent(type="text", text=result.content)]
 
     except Exception as e:

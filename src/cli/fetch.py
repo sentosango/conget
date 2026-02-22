@@ -4,7 +4,7 @@ import logging
 import sys
 from typing import Any, Dict, List
 
-from src.core.config import get_default_format
+from src.core.config import get_default_cache_ttl, get_default_format
 from src.core.exceptions import CongetError, HTTPError, PluginLoadError
 from src.core.registry import get_fetchers
 
@@ -140,7 +140,7 @@ def run(args):
     logger.info(f"Using fetcher: {fetcher_name}")
 
     try:
-        result = fetcher.fetch(args.url, output_format)
+        result = fetcher.fetch_with_cache(url=args.url, output_format=output_format, cache_ttl=get_default_cache_ttl())
         print(result.content)
     except HTTPError as e:
         logger.error(f"HTTP error: {e}")

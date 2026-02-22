@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # Default configuration
 DEFAULT_CONFIG = {
     "default_format": "markdown",
-    "default": {},
+    "cache_ttl": 300,
 }
 
 
@@ -91,9 +91,21 @@ def get_default_format() -> str:
     """
     config = get_config()
     general = config.get("general", {})
-    default_format = general.get("default_format", "markdown")
+    default_format = general.get("default_format", DEFAULT_CONFIG["default_format"])
     logger.debug(f"[FIX] Default format from config: {default_format}")
     return default_format
+
+
+def get_default_cache_ttl() -> int:
+    """Get the default cache TTL from configuration.
+
+    Returns:
+        Default cache TTL in seconds.
+    """
+    config = get_config()
+    general = config.get("general", {})
+    cache_ttl = general.get("cache_ttl", DEFAULT_CONFIG["cache_ttl"])
+    return cache_ttl
 
 
 def get_section_config(section: str) -> Dict[str, Any]:
@@ -145,7 +157,8 @@ def generate_config_template() -> str:
 
     # General section
     general = tomlkit.table()
-    general.add("default_format", "markdown")
+    general.add("default_format", DEFAULT_CONFIG["default_format"])
+    general.add("cache_ttl", DEFAULT_CONFIG["cache_ttl"])
     doc.add("general", general)
 
     options = collect_fetcher_options()

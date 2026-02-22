@@ -1,17 +1,22 @@
 """Interfaces for conget fetchers."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from .types import FetcherMetadata, FetchResult
+from src.core.cache import CacheManager
+from src.core.config import get_section_config
+from src.core.types import FetcherMetadata, FetchResult
+
+logger = logging.getLogger(__name__)
 
 
 class BaseFetcher(ABC):
     """Base interface that all fetchers must implement.
 
     All fetchers must provide metadata through the metadata property and
-    implement the can_fetch and fetch methods. The fetch method returns
-    a FetchResult object containing the fetched content and metadata.
+    implement the can_fetch and fetch methods. The fetch_with_cache method handles
+    caching automatically.
     """
 
     @property
@@ -55,6 +60,54 @@ class BaseFetcher(ABC):
             ParsingError: If parsing the fetched content fails.
             CongetError: For other conget-specific errors.
         """
+
+    def fetch_with_cache(self, url: str, output_format: str, cache_ttl: int = 0) -> FetchResult:
+        """Fetch content from the URL with optional caching.
+
+        This method handles caching automatically. If cache_ttl > 0, it
+        checks the cache first and returns cached results if available.
+        Otherwise, it calls fetch and caches the result.
+
+        Args:
+            url: The URL to fetch from.
+            output_format: The output format (html, markdown, text, json, etc.).
+            cache_ttl: Cache time-to-live in seconds. 0 disables caching.
+
+        Returns:
+            FetchResult: Object containing the fetched content, URL, format,
+                and optional metadata.
+        """
+        # Skip cache if TTL is not set
+        if cache_ttl <= 0:
+            return self.fetch(url, output_format)
+
+        cache = CacheManager(namespace=self.metadata.name)
+
+        # Get current config values for cache key
+        config = get_section_config(self.metadata.name)
+        cache_options = {
+            key: config.get(key, opt.default)
+            for key, opt in self.metadata.config_options.items()
+        }
+
+        cache_key = CacheManager.generate_key(
+            url=url,
+            output_format=output_format,
+            options=cache_options if cache_options else None,
+        )
+
+        cached = cache.get(cache_key, ttl=cache_ttl)
+        if cached is not None:
+            logger.debug(f"Cache hit for {url}")
+            return cached
+
+        # Perform actual fetch
+        result = self.fetch(url, output_format)
+
+        cache.set(cache_key, result)
+        logger.debug(f"Cached result for {url}")
+
+        return result
 
     @classmethod
     def run_cli(
@@ -137,7 +190,8 @@ class BaseFetcher(ABC):
 
         # Fetch and print content
         try:
-            result = fetcher.fetch(args.url, format)
+            from .config import get_default_cache_ttl
+            result = fetcher.fetch_with_cache(args.url, output_format=format, cache_ttl=get_default_cache_ttl())
             print(result.content)
         except Exception as e:
             logger.error(f"Error: {e}")
