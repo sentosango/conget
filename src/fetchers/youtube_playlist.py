@@ -100,12 +100,13 @@ class YoutubePlaylistFetcher(BaseFetcher):
         """
         return extract_playlist_id(url) is not None
 
-    def fetch(self, url: str, output_format: str) -> FetchResult:
+    def fetch(self, url: str, output_format: str, fetch_options: dict[str, Any] | None = None) -> FetchResult:
         """Fetch playlist metadata from the URL in the specified format.
 
         Args:
             url: The YouTube playlist URL to fetch from
             output_format: The output format (markdown, text, json)
+            fetch_options: Optional dictionary of fetcher-specific options
 
         Returns:
             FetchResult containing the playlist metadata
@@ -115,6 +116,8 @@ class YoutubePlaylistFetcher(BaseFetcher):
             ValidationError: If the URL is not a valid YouTube playlist URL
             FetchError: If fetching fails
         """
+        fetch_options = fetch_options or {}
+
         if output_format not in self.metadata.supported_formats:
             raise UnsupportedFormatError(
                 message=f"Unsupported format: {output_format}. Supported: {self.metadata.supported_formats}",
@@ -131,9 +134,16 @@ class YoutubePlaylistFetcher(BaseFetcher):
         canonical_url = normalize_url(playlist_id)
         logger.debug(f"Canonical URL: {canonical_url}")
 
-        # Get config options (use defaults from metadata)
-        lang = self.metadata.config_options["lang"].default
-        with_list = self.metadata.config_options["with_list"].default
+        # Get options from fetch_options or use defaults from metadata
+        lang = fetch_options.get(
+            "lang",
+            self.metadata.config_options["lang"].default,
+        )
+        with_list = fetch_options.get(
+            "with_list",
+            self.metadata.config_options["with_list"].default,
+        )
+        logger.debug(f"Using lang={lang}, with_list={with_list}")
 
         # yt-dlp options for metadata extraction only
         # extract_flat='in_playlist' for fast video list without full extraction

@@ -4,6 +4,7 @@ This module provides the DefaultFetcher class for generic web content extraction
 """
 
 import logging
+from typing import Any, Dict
 
 import trafilatura
 
@@ -67,12 +68,13 @@ class DefaultFetcher(BaseFetcher):
         """
         return True
 
-    def fetch(self, url: str, output_format: str) -> FetchResult:
+    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
         """Fetch content from the URL in the specified format.
 
         Args:
             url: The URL to fetch from
             output_format: The output format (html, markdown, text, xmltei, json, csv)
+            fetch_options: Optional merged configuration options
 
         Returns:
             FetchResult containing the fetched content and metadata
@@ -90,8 +92,7 @@ class DefaultFetcher(BaseFetcher):
 
         logger.info(f"Fetching {url} with format {output_format}")
 
-        config = get_section_config("default")
-        downloaded = trafilatura.fetch_url(url, no_ssl=config.get("no_ssl", False))
+        downloaded = trafilatura.fetch_url(url, no_ssl=fetch_options.get("no_ssl", False) if fetch_options else False)
 
         if downloaded is None:
             raise FetchError(f"Failed to fetch URL: {url}")
@@ -104,12 +105,12 @@ class DefaultFetcher(BaseFetcher):
         content = trafilatura.extract(
             downloaded,
             output_format=trafilatura_format,
-            include_comments=config.get("include_comments", True),
-            include_tables=config.get("include_tables", True),
-            include_images=config.get("include_images", True),
-            include_formatting=config.get("include_formatting", True),
-            include_links=config.get("include_links", True),
-            with_metadata=config.get("with_metadata", True),
+            include_comments=fetch_options.get("include_comments", True) if fetch_options else True,
+            include_tables=fetch_options.get("include_tables", True) if fetch_options else True,
+            include_images=fetch_options.get("include_images", True) if fetch_options else True,
+            include_formatting=fetch_options.get("include_formatting", True) if fetch_options else True,
+            include_links=fetch_options.get("include_links", True) if fetch_options else True,
+            with_metadata=fetch_options.get("with_metadata", True) if fetch_options else True,
         )
 
         return FetchResult(

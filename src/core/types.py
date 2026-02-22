@@ -95,12 +95,14 @@ class FetcherMatch:
         is_special: Whether this is a specialized fetcher
         supported_formats: List of formats this fetcher supports
         description: Description of the fetcher
+        config_options: Dictionary mapping option names to ConfigOption instances
     """
 
     name: str
     is_special: bool
     supported_formats: List[str]
     description: str
+    config_options: Dict[str, ConfigOption] = field(default_factory=dict)
 
     def __lt__(self, other: "FetcherMatch") -> bool:
         """Sort special fetchers first, then by name.

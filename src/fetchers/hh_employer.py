@@ -61,7 +61,9 @@ class HHEmployerFetcher(BaseFetcher):
     def can_fetch(self, url: str) -> bool:
         return bool(HH_EMPLOYER_PATTERN.match(url))
 
-    def fetch(self, url: str, output_format: str) -> FetchResult:
+    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
+        fetch_options = fetch_options or {}
+
         if output_format not in self.metadata.supported_formats:
             raise UnsupportedFormatError(
                 message=f"Unsupported format: {output_format}. Supported: {self.metadata.supported_formats}",
@@ -77,8 +79,15 @@ class HHEmployerFetcher(BaseFetcher):
 
         employer_id = match.group(1)
 
+        # Get timeout from fetch_options or use default
+        timeout = fetch_options.get(
+            key="timeout",
+            default=self.metadata.config_options["timeout"].default,
+        )
+        logger.debug(f"Using timeout: {timeout}")
+
         # Fetch data from API
-        data = self._fetch_employer_data(employer_id)
+        data = self._fetch_employer_data(employer_id, timeout)
 
         # Format output
         if output_format == "json":
@@ -96,13 +105,13 @@ class HHEmployerFetcher(BaseFetcher):
             metadata={"employer_id": employer_id},
         )
 
-    def _fetch_employer_data(self, employer_id: str) -> Dict[str, Any]:
+    def _fetch_employer_data(self, employer_id: str, timeout: int = 30) -> Dict[str, Any]:
         """Fetch employer data from hh.ru API."""
         url = f"{self.base_url}/employers/{employer_id}"
         logger.debug(f"Fetching from API: {url}")
 
         try:
-            response = requests.get(url, timeout=30)
+            response = requests.get(url, timeout=timeout)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.Timeout as e:

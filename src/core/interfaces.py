@@ -1,11 +1,12 @@
 """Interfaces for conget fetchers."""
 
+import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from src.core.cache import CacheManager
-from src.core.config import get_section_config
+from src.core.config import get_section_config, merge_cli_options
 from src.core.types import FetcherMetadata, FetchResult
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,13 @@ class BaseFetcher(ABC):
             CongetError: For other conget-specific errors.
         """
 
-    def fetch_with_cache(self, url: str, output_format: str, cache_ttl: int = 0) -> FetchResult:
+    def fetch_with_cache(
+        self,
+        url: str,
+        output_format: str,
+        cache_ttl: int = 0,
+        fetch_options: Dict[str, Any] | None = None,
+    ) -> FetchResult:
         """Fetch content from the URL with optional caching.
 
         This method handles caching automatically. If cache_ttl > 0, it
@@ -72,6 +79,7 @@ class BaseFetcher(ABC):
             url: The URL to fetch from.
             output_format: The output format (html, markdown, text, json, etc.).
             cache_ttl: Cache time-to-live in seconds. 0 disables caching.
+            fetch_options: Fetcher options for cache key generation (optional).
 
         Returns:
             FetchResult: Object containing the fetched content, URL, format,
@@ -83,17 +91,11 @@ class BaseFetcher(ABC):
 
         cache = CacheManager(namespace=self.metadata.name)
 
-        # Get current config values for cache key
-        config = get_section_config(self.metadata.name)
-        cache_options = {
-            key: config.get(key, opt.default)
-            for key, opt in self.metadata.config_options.items()
-        }
-
+        # Use provided fetch_options for cache key
         cache_key = CacheManager.generate_key(
             url=url,
             output_format=output_format,
-            options=cache_options if cache_options else None,
+            options=fetch_options if fetch_options else None,
         )
 
         cached = cache.get(cache_key, ttl=cache_ttl)
@@ -166,6 +168,11 @@ class BaseFetcher(ABC):
             action="store_true",
             help="Enable verbose logging",
         )
+        parser.add_argument(
+            "--options",
+            type=str,
+            help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')',
+        )
 
         args = parser.parse_args()
 
@@ -188,10 +195,29 @@ class BaseFetcher(ABC):
             )
             raise SystemExit(1)
 
+        # Parse fetch options from --options argument
+        fetch_options = None
+        if args.options:
+            try:
+                fetch_options = json.loads(args.options)
+                logger.debug(f"Parsed fetch options: {fetch_options}")
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to parse --options JSON: {e}. Ignoring options.")
+                fetch_options = None
+
+        # Merge CLI options with config and defaults
+        merged_options = merge_cli_options(fetcher.metadata.name, fetch_options)
+        logger.debug(f"Using merged options: {merged_options}")
+
         # Fetch and print content
         try:
             from .config import get_default_cache_ttl
-            result = fetcher.fetch_with_cache(args.url, output_format=format, cache_ttl=get_default_cache_ttl())
+            result = fetcher.fetch_with_cache(
+                args.url,
+                output_format=format,
+                cache_ttl=get_default_cache_ttl(),
+                fetch_options=merged_options if merged_options else None,
+            )
             print(result.content)
         except Exception as e:
             logger.error(f"Error: {e}")

@@ -10,7 +10,7 @@ from mcp.types import Tool, TextContent
 
 from src.core.registry import get_fetchers
 from src.cli.fetch import select_best_fetcher
-from src.core.config import get_default_format, get_default_cache_ttl
+from src.core.config import get_default_format, get_default_cache_ttl, merge_cli_options
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,10 @@ async def list_tools() -> list[Tool]:
                         "type": "string",
                         "description": "Specific fetcher to use (default: auto-select)",
                     },
+                    "options": {
+                        "type": "object",
+                        "description": "Fetcher-specific options (e.g., {\"with_subs\": false})",
+                    },
                 },
                 "required": ["url"],
             },
@@ -68,6 +72,7 @@ async def fetch_url_handler(arguments: Any) -> list[TextContent]:
     url = arguments.get("url")
     output_format = arguments.get("format") or get_default_format()
     fetcher_name = arguments.get("fetcher")
+    cli_options = arguments.get("options")
 
     logger.info(f"Fetching URL: {url} with format: {output_format}")
 
@@ -87,6 +92,9 @@ async def fetch_url_handler(arguments: Any) -> list[TextContent]:
     fetcher_class = fetchers[fetcher_name]
     fetcher = fetcher_class()
 
+    # Merge CLI options with config file values
+    merged_options = merge_cli_options(fetcher.metadata.name, cli_options)
+
     try:
         if output_format not in fetcher.metadata.supported_formats:
             return [
@@ -96,7 +104,12 @@ async def fetch_url_handler(arguments: Any) -> list[TextContent]:
                 )
             ]
 
-        result = fetcher.fetch_with_cache(url, output_format, cache_ttl=get_default_cache_ttl())
+        result = fetcher.fetch_with_cache(
+            url,
+            output_format,
+            cache_ttl=get_default_cache_ttl(),
+            fetch_options=merged_options,
+        )
         return [TextContent(type="text", text=result.content)]
 
     except Exception as e:
@@ -122,12 +135,20 @@ async def analyze_urls_handler(arguments: Any) -> list[TextContent]:
         for fetcher_name, cls in fetchers.items():
             fetcher = cls()
             if fetcher.can_fetch(url):
+                config_options = {}
+                for opt_name, opt_value in fetcher.metadata.config_options.items():
+                    config_options[opt_name] = {
+                        "default": opt_value.default,
+                        "description": opt_value.description,
+                    }
+
                 available.append(
                     {
                         "name": fetcher_name,
                         "special": fetcher.metadata.is_special,
                         "formats": fetcher.metadata.supported_formats,
                         "description": fetcher.metadata.description,
+                        "config_options": config_options,
                     }
                 )
 
@@ -140,6 +161,12 @@ async def analyze_urls_handler(arguments: Any) -> list[TextContent]:
             output_lines.append(f"  {f['name']}{special_marker}")
             output_lines.append(f"    Formats: {', '.join(f['formats'])}")
             output_lines.append(f"    Description: {f['description']}")
+            if f["config_options"]:
+                output_lines.append(f"    Config Options:")
+                for opt_name, opt_info in f["config_options"].items():
+                    output_lines.append(
+                        f"      {opt_name}: {opt_info['default']} - {opt_info['description']}"
+                    )
 
     return [TextContent(type="text", text="\n".join(output_lines))]
 

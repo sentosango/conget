@@ -212,6 +212,68 @@ def regenerate_config() -> str:
     return str(config_file)
 
 
+def merge_cli_options(
+    fetcher_name: str,
+    cli_options: Dict[str, Any] | None,
+) -> Dict[str, Any]:
+    """Merge CLI options with config file values.
+
+    Priority: CLI > Config > Metadata default
+
+    Args:
+        fetcher_name: Fetcher name (e.g., 'youtube-video')
+        cli_options: Options from --options JSON argument (can be None)
+
+    Returns:
+        Merged options dict with final values
+    """
+    logger.debug(f"merge_cli_options called for fetcher={fetcher_name}, cli_options={cli_options}")
+
+    # Get config section for this fetcher
+    config_values = get_section_config(fetcher_name)
+    logger.debug(f"Config values for {fetcher_name}: {config_values}")
+
+    # Get fetcher metadata defaults by loading the fetcher
+    from src.core.registry import get_fetchers
+
+    fetcher_classes = get_fetchers()
+    metadata_defaults: Dict[str, Any] = {}
+
+    # Find the fetcher by name (metadata.name, not registry key)
+    for _registry_key, fetcher_cls in fetcher_classes.items():
+        try:
+            fetcher = fetcher_cls()
+            if fetcher.metadata.name == fetcher_name:
+                for opt_name, opt_def in fetcher.metadata.config_options.items():
+                    metadata_defaults[opt_name] = opt_def.default
+                logger.debug(f"Metadata defaults for {fetcher_name}: {metadata_defaults}")
+                break
+        except Exception as e:
+            logger.warning(f"Failed to load fetcher for defaults: {e}")
+
+    # Start with metadata defaults
+    merged = metadata_defaults.copy()
+
+    # Override with config values (if key exists in config)
+    for key in merged:
+        if key in config_values:
+            merged[key] = config_values[key]
+
+    # Override with CLI options (highest priority)
+    if cli_options:
+        for key, value in cli_options.items():
+            # Warn about unknown options
+            if key not in metadata_defaults:
+                logger.warning(
+                    f"Unknown option '{key}' for fetcher '{fetcher_name}'. "
+                    f"Valid options: {list(metadata_defaults.keys())}"
+                )
+            merged[key] = value
+
+    logger.debug(f"Final merged options for {fetcher_name}: {merged}")
+    return merged
+
+
 def upgrade_config() -> tuple[bool, list[AddedItem] | str]:
     """Upgrade config file with new fetcher options.
 

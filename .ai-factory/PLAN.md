@@ -39,7 +39,7 @@ CLI --options > Config file > Metadata default
 
 ### Phase 1: Core Infrastructure
 
-#### Task 1: Add `merge_cli_options()` in config.py
+#### [x] Task 1: Add `merge_cli_options()` in config.py
 **File:** `src/core/config.py`
 
 Add function to merge CLI options with config:
@@ -73,7 +73,7 @@ Implementation:
 
 ---
 
-#### Task 2: Modify `BaseFetcher.run_cli()` to add --options
+#### [x] Task 2: Modify `BaseFetcher.run_cli()` to add --options
 **File:** `src/core/interfaces.py`
 
 Changes to `run_cli()`:
@@ -98,7 +98,7 @@ Changes to `run_cli()`:
 
 ---
 
-#### Task 3: Add --options to main fetch command
+#### [x] Task 3: Add --options to main fetch command
 **File:** `src/cli/fetch.py`
 
 Changes to `run()`:
@@ -110,7 +110,7 @@ Changes to `run()`:
 
 ### Phase 2: Update Fetchers
 
-#### Task 4: Update YoutubeVideoFetcher to use merged options
+#### [x] Task 4: Update YoutubeVideoFetcher to use merged options
 **File:** `src/fetchers/youtube_video.py`
 
 Changes:
@@ -126,7 +126,7 @@ Changes:
 
 ---
 
-#### Task 5: Update DefaultFetcher to use merged options
+#### [x] Task 5: Update DefaultFetcher to use merged options
 **File:** `src/fetchers/default.py`
 
 Same pattern as Task 4:
@@ -135,7 +135,7 @@ Same pattern as Task 4:
 
 ---
 
-#### Task 6: Update remaining fetchers
+#### [x] Task 6: Update remaining fetchers
 **Files:**
 - `src/fetchers/github_repo.py`
 - `src/fetchers/hh_vacancy.py`
@@ -148,7 +148,7 @@ Apply same pattern if they use config options.
 
 ### Phase 3: CLI & MCP Display Updates
 
-#### Task 8: Show config_options in conget list
+#### [x] Task 8: Show config_options in conget list
 **File:** `src/cli/list.py`
 
 For each fetcher, after showing formats, also show available options:
@@ -163,14 +163,14 @@ For each fetcher, after showing formats, also show available options:
 
 ---
 
-#### Task 9: Show config_options in conget analyze
+#### [x] Task 9: Show config_options in conget analyze
 **File:** `src/cli/analyze.py`
 
 Same pattern as Task 8 - show config_options for each matching fetcher.
 
 ---
 
-#### Task 10: Add options parameter to MCP fetch tool
+#### [x] Task 10: Add options parameter to MCP fetch tool
 **File:** `src/cli/mcp.py`
 
 Changes:
@@ -186,7 +186,7 @@ Changes:
 
 ---
 
-#### Task 11: Show config_options in MCP analyze tool
+#### [x] Task 11: Show config_options in MCP analyze tool
 **File:** `src/cli/mcp.py`
 
 In analyze_urls_handler, for each available fetcher also return config_options info.
@@ -195,7 +195,7 @@ In analyze_urls_handler, for each available fetcher also return config_options i
 
 ### Phase 4: Cache & Fetcher Integration
 
-#### Task 7: Update cache key generation to use merged options
+#### [x] Task 7: Update cache key generation to use merged options
 **File:** `src/core/interfaces.py`
 
 Modify `fetch_with_cache()`:

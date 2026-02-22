@@ -1,10 +1,11 @@
 """Fetch command for conget CLI."""
 
+import json
 import logging
 import sys
 from typing import Any, Dict, List
 
-from src.core.config import get_default_cache_ttl, get_default_format
+from src.core.config import get_default_cache_ttl, get_default_format, merge_cli_options
 from src.core.exceptions import CongetError, HTTPError, PluginLoadError
 from src.core.registry import get_fetchers
 
@@ -139,8 +140,27 @@ def run(args):
 
     logger.info(f"Using fetcher: {fetcher_name}")
 
+    # Parse --options JSON argument
+    cli_options = None
+    if args.options:
+        try:
+            cli_options = json.loads(args.options)
+            logger.debug(f"Parsed CLI options: {cli_options}")
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON in --options argument: {e}", file=sys.stderr)
+            raise SystemExit(1)
+
+    # Merge CLI options with config
+    fetcher_options = merge_cli_options(fetcher.metadata.name, cli_options)
+    logger.debug(f"Final fetcher options: {fetcher_options}")
+
     try:
-        result = fetcher.fetch_with_cache(url=args.url, output_format=output_format, cache_ttl=get_default_cache_ttl())
+        result = fetcher.fetch_with_cache(
+            url=args.url,
+            output_format=output_format,
+            cache_ttl=get_default_cache_ttl(),
+            fetch_options=fetcher_options,
+        )
         print(result.content)
     except HTTPError as e:
         logger.error(f"HTTP error: {e}")

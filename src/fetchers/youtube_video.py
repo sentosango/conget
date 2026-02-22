@@ -7,13 +7,12 @@ from YouTube videos using yt-dlp (no authentication, no video download).
 import json
 import logging
 import re
-from typing import Any
+from typing import Any, Dict
 
 import requests
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError, ExtractorError
 
-from src.core.config import get_section_config
 from src.core.exceptions import FetchError, UnsupportedFormatError, ValidationError
 from src.core.formatters import markdown_to_text
 from src.core.interfaces import BaseFetcher
@@ -96,12 +95,13 @@ class YoutubeVideoFetcher(BaseFetcher):
         """
         return extract_video_id(url) is not None
 
-    def fetch(self, url: str, output_format: str) -> FetchResult:
+    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
         """Fetch video metadata from the URL in the specified format.
 
         Args:
             url: The YouTube video URL to fetch from
             output_format: The output format (markdown, text, json)
+            fetch_options: Optional dictionary of fetch options
 
         Returns:
             FetchResult containing the video metadata
@@ -127,22 +127,17 @@ class YoutubeVideoFetcher(BaseFetcher):
         canonical_url = normalize_url(video_id)
         logger.debug(f"Canonical URL: {canonical_url}")
 
-        # Get lang from config (default from metadata)
-        lang = self.metadata.config_options["lang"].default
+        # Use merged options from fetch_options, falling back to metadata defaults
+        options = fetch_options or {}
+        lang = options.get("lang", self.metadata.config_options["lang"].default)
+        with_subs_raw = options.get("with_subs")
 
-        # Get with_subs from config (default from metadata), convert to boolean
-        config = get_section_config(self.metadata.name)
-        with_subs_raw = config.get("with_subs", None)
-
-        # Convert to boolean, handling TOML string/bool values
+        # Convert with_subs to boolean, handling potential string/bool values
         if with_subs_raw is None:
-            # No config value, use metadata default
             with_subs = self.metadata.config_options["with_subs"].default
         elif isinstance(with_subs_raw, bool):
-            # Config value is already bool
             with_subs = with_subs_raw
         else:
-            # String or int value from config - convert to bool
             with_subs = bool(with_subs_raw)
 
         logger.debug(f"with_subs: raw={with_subs_raw!r}, converted={with_subs}")

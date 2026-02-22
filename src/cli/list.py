@@ -33,4 +33,10 @@ def run(args):
         print(f"  {name}{special_marker}")
         print(f"    Description: {fetcher.metadata.description}")
         print(f"    Formats: {', '.join(fetcher.metadata.supported_formats)}")
+
+        if fetcher.metadata.config_options:
+            print("    Options:")
+            for option_name, option in fetcher.metadata.config_options.items():
+                print(f"      {option_name}: {option.description} (default: {repr(option.default)})")
+
         print()

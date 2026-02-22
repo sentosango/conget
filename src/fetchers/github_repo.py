@@ -5,6 +5,7 @@ This module provides the GitHubRepoFetcher class for fetching GitHub repository 
 
 import logging
 import re
+from typing import Any, Dict
 
 import trafilatura
 
@@ -51,12 +52,13 @@ class GitHubRepoFetcher(BaseFetcher):
         """
         return bool(GITHUB_REPO_PATTERN.match(url))
 
-    def fetch(self, url: str, output_format: str) -> FetchResult:
+    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
         """Fetch content from the URL in the specified format.
 
         Args:
             url: The GitHub repository URL to fetch from
             output_format: The output format (markdown, text, json)
+            fetch_options: Optional dictionary of fetcher-specific options
 
         Returns:
             FetchResult containing the fetched README content and metadata
@@ -66,6 +68,8 @@ class GitHubRepoFetcher(BaseFetcher):
             ValidationError: If the URL is not a valid GitHub repository URL
             FetchError: If fetching fails
         """
+        fetch_options = fetch_options or {}
+
         if output_format not in self.metadata.supported_formats:
             raise UnsupportedFormatError(
                 message=f"Unsupported format: {output_format}. Supported: {self.metadata.supported_formats}",
@@ -81,17 +85,25 @@ class GitHubRepoFetcher(BaseFetcher):
 
         owner, repo = match.groups()
 
+        # Get prefer_branch from fetch_options or use default
+        prefer_branch = fetch_options.get(
+            "prefer_branch",
+            self.metadata.config_options["prefer_branch"].default,
+        )
+        logger.debug(f"Using prefer_branch: {prefer_branch}")
+
         # Fetch README.md from GitHub
-        readme_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md"
+        readme_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{prefer_branch}/README.md"
         logger.debug(f"Fetching README from: {readme_url}")
 
         downloaded = trafilatura.fetch_url(readme_url)
         if downloaded is None:
-            # Try master branch as fallback
+            # Try the other branch as fallback
+            fallback_branch = "master" if prefer_branch == "main" else "main"
             readme_url = (
-                f"https://raw.githubusercontent.com/{owner}/{repo}/master/README.md"
+                f"https://raw.githubusercontent.com/{owner}/{repo}/{fallback_branch}/README.md"
             )
-            logger.debug(f"Trying master branch: {readme_url}")
+            logger.debug(f"Trying {fallback_branch} branch: {readme_url}")
             downloaded = trafilatura.fetch_url(readme_url)
 
         if downloaded is None:

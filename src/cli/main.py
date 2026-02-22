@@ -33,6 +33,11 @@ def main():
         action="store_true",
         help="List all available fetchers for URL",
     )
+    fetch_parser.add_argument(
+        "--options",
+        type=str,
+        help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')',
+    )
 
     # conget list
     list_parser = subparsers.add_parser("list", help="List all available fetchers")
