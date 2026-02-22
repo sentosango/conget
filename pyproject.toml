@@ -12,11 +12,12 @@ dependencies = [
     "tomlkit>=0.14.0",
     "yt-dlp>=2026.2.4",
     "platformdirs>=4.0.0",
+    "typer>=0.24.1",
 ]
 
 [project.scripts]
 # Main CLI
-conget = "src.cli.main:main"
+conget = "src.cli.main:main_entry"
 
 # Specialized fetcher CLIs (run directly from fetcher modules)
 conget-default = "src.fetchers.default:cli"

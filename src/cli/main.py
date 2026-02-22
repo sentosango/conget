@@ -1,64 +1,51 @@
 """Main CLI entry point for conget."""
 
-import argparse
 import logging
 import sys
+from typing import Annotated, Optional
+
+import typer
+
+from src.cli import analyze, config, fetch, list as list_cmd
+
+# Global state for verbose mode
+state = {"verbose": False}
+
+app = typer.Typer(
+    name="conget",
+    help="Conget - Simple CLI for fetching web content with plugin architecture",
+    no_args_is_help=True,
+)
 
 
-def main():
-    # Show help if no arguments provided
-    if len(sys.argv) == 1:
-        sys.argv.append("--help")
+@app.callback()
+def main(
+    verbose: Annotated[bool, typer.Option("-v", "--verbose", help="Enable verbose logging")] = False,
+):
+    """Conget - Simple CLI for fetching web content with plugin architecture."""
+    state["verbose"] = verbose
+    # Setup logging based on verbose flag
+    logging.basicConfig(level=logging.DEBUG if verbose else logging.WARNING)
 
-    parser = argparse.ArgumentParser(
-        description="Conget - Simple CLI for fetching web content with plugin architecture"
-    )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose logging"
-    )
 
-    subparsers = parser.add_subparsers(
-        dest="command", required=False, help="Available commands"
-    )
+# Register commands
+app.command(name="fetch")(fetch.fetch)
+app.command(name="list")(list_cmd.list_cmd)
+app.command(name="analyze")(analyze.analyze)
+app.command(name="config")(config.config)
 
-    # conget fetch
-    fetch_parser = subparsers.add_parser("fetch", help="Fetch content from a URL")
-    fetch_parser.add_argument("url", help="URL to fetch from")
-    fetch_parser.add_argument(
-        "--fetcher", "-F", help="Specific fetcher to use (default: auto-select)"
-    )
-    fetch_parser.add_argument("--format", "-f", help="Output format")
-    fetch_parser.add_argument(
-        "--list-fetchers",
-        action="store_true",
-        help="List all available fetchers for URL",
-    )
-    fetch_parser.add_argument(
-        "--options",
-        type=str,
-        help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')',
-    )
 
-    # conget list
-    list_parser = subparsers.add_parser("list", help="List all available fetchers")
-    list_parser.add_argument(
-        "--format", "-f", help="Show fetchers supporting this format"
-    )
+@app.command(name="mcp")
+def mcp_cmd():
+    """Start MCP server."""
+    from src.cli.mcp import run
+    run(None)
 
-    # conget analyze
-    analyze_parser = subparsers.add_parser(
-        "analyze", help="Analyze URLs to see which fetchers can handle them"
-    )
-    analyze_parser.add_argument("urls", nargs="+", help="URLs to analyze")
 
-    # conget mcp
-    subparsers.add_parser("mcp", help="Start MCP server")
-
-    # conget config
-    subparsers.add_parser("config", help="Show and upgrade config file")
-
+def main_entry():
+    """Entry point for the CLI."""
     # Check if first positional argument is a known command
-    known_commands = {"fetch", "list", "analyze", "mcp", "config"}
+    known_commands = {"fetch", "list", "analyze", "mcp", "config", "--help", "--version", "--install-completion", "--show-completion"}
 
     # Find first positional argument (not starting with -)
     first_pos_arg = None
@@ -70,46 +57,13 @@ def main():
     # If first arg is not a known command, treat as implicit fetch
     if first_pos_arg and first_pos_arg not in known_commands:
         logging.debug(
-            f"[FIX] No command specified, treating '{first_pos_arg}' as URL for implicit fetch"
+            f"No command specified, treating '{first_pos_arg}' as URL for implicit fetch"
         )
-        # Prepend "fetch" to arguments and re-parse
+        # Prepend "fetch" to arguments
         sys.argv = [sys.argv[0], "fetch"] + sys.argv[1:]
 
-    # Show fetch help if called without URL
-    if len(sys.argv) >= 2 and sys.argv[1] == "fetch" and len(sys.argv) == 2:
-        subparsers.choices["fetch"].print_help()
-        sys.exit(0)
-
-    # Show analyze help if called without URLs
-    if len(sys.argv) >= 2 and sys.argv[1] == "analyze" and len(sys.argv) == 2:
-        subparsers.choices["analyze"].print_help()
-        sys.exit(0)
-
-    args = parser.parse_args()
-
-    # Setup logging
-    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)
-
-    if args.command == "fetch":
-        from src.cli.fetch import run
-
-        run(args)
-    elif args.command == "list":
-        from src.cli.list import run
-
-        run(args)
-    elif args.command == "analyze":
-        from src.cli.analyze import run
-
-        run(args)
-    elif args.command == "mcp":
-        from src.cli.mcp import run
-
-        run(args)
-    elif args.command == "config":
-        from src.cli.config import run
-        run(args)
+    app()
 
 
 if __name__ == "__main__":
-    main()
+    main_entry()

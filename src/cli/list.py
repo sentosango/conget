@@ -2,16 +2,21 @@
 
 import logging
 
+import typer
+from typing import Annotated
+
 from src.core.registry import get_fetchers
 
 logger = logging.getLogger(__name__)
 
 
-def run(args):
+def list_cmd(
+    format: Annotated[str | None, typer.Option("-f", "--format", help="Show fetchers supporting this format")] = None,
+):
     """Execute the list command.
 
     Args:
-        args: Parsed command-line arguments.
+        format: Optional format filter for fetchers.
     """
     fetchers = get_fetchers()
 
@@ -26,7 +31,7 @@ def run(args):
         fetcher = cls()
 
         # Filter by format if specified
-        if args.format and args.format not in fetcher.metadata.supported_formats:
+        if format and format not in fetcher.metadata.supported_formats:
             continue
 
         special_marker = " [special]" if fetcher.metadata.is_special else ""

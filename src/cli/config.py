@@ -3,6 +3,8 @@
 import logging
 from typing import Any
 
+import typer
+
 
 def _format_value(value: Any) -> str:
     """Format a value for display as it appears in TOML."""
@@ -13,14 +15,11 @@ def _format_value(value: Any) -> str:
     return str(value)
 
 
-def run(args):
+def config():
     """Handle config command.
 
     Shows config path, upgrades config with new fetcher options,
     and displays what was added.
-
-    Args:
-        args: Parsed argparse arguments.
     """
     logger = logging.getLogger(__name__)
 

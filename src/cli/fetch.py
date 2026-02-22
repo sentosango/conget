@@ -3,7 +3,9 @@
 import json
 import logging
 import sys
-from typing import Any, Dict, List
+from typing import Annotated, Any, Dict, List
+
+import typer
 
 from src.core.config import get_default_cache_ttl, get_default_format, merge_cli_options
 from src.core.exceptions import CongetError, HTTPError, PluginLoadError
@@ -81,11 +83,29 @@ def list_available_fetchers(url: str) -> List[Dict[str, Any]]:
     return available
 
 
-def run(args):
+def fetch(
+    url: Annotated[str, typer.Argument(help="URL to fetch from")],
+    fetcher: Annotated[
+        str | None, typer.Option("-F", "--fetcher", help="Specific fetcher to use (default: auto-select)")
+    ] = None,
+    format: Annotated[
+        str | None, typer.Option("-f", "--format", help="Output format")
+    ] = None,
+    list_fetchers: Annotated[
+        bool, typer.Option("--list-fetchers", help="List all available fetchers for URL")
+    ] = False,
+    options: Annotated[
+        str | None, typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')')
+    ] = None,
+):
     """Execute the fetch command.
 
     Args:
-        args: Parsed command-line arguments.
+        url: URL to fetch from.
+        fetcher: Specific fetcher to use (default: auto-select).
+        format: Output format.
+        list_fetchers: List all available fetchers for URL.
+        options: Fetcher options as JSON.
     """
     try:
         fetchers = get_fetchers()
@@ -98,14 +118,14 @@ def run(args):
         raise SystemExit(1)
 
     # List fetchers for URL if requested
-    if args.list_fetchers:
-        available = list_available_fetchers(args.url)
+    if list_fetchers:
+        available = list_available_fetchers(url)
 
         if not available:
-            print(f"No fetchers available for: {args.url}")
+            print(f"No fetchers available for: {url}")
             return
 
-        print(f"Available fetchers for {args.url}:")
+        print(f"Available fetchers for {url}:")
         for f in available:
             special_marker = " [special]" if f["special"] else ""
             print(f"  {f['name']}{special_marker}: {f['description']}")
@@ -113,27 +133,27 @@ def run(args):
         return
 
     # Select fetcher
-    if args.fetcher:
-        fetcher_name = args.fetcher
+    if fetcher:
+        fetcher_name = fetcher
         if fetcher_name not in fetchers:
             print(f"Error: Unknown fetcher '{fetcher_name}'", file=sys.stderr)
             print(f"Available: {', '.join(fetchers.keys())}", file=sys.stderr)
             raise SystemExit(1)
     else:
-        fetcher_name = select_best_fetcher(fetchers, args.url, args.format)
+        fetcher_name = select_best_fetcher(fetchers, url, format)
 
     fetcher_class = fetchers[fetcher_name]
-    fetcher = fetcher_class()
-    output_format = args.format or get_default_format()
+    fetcher_instance = fetcher_class()
+    output_format = format or get_default_format()
 
     # Validate format
-    if output_format not in fetcher.metadata.supported_formats:
+    if output_format not in fetcher_instance.metadata.supported_formats:
         print(
             f"Error: Fetcher '{fetcher_name}' does not support format '{output_format}'",
             file=sys.stderr,
         )
         print(
-            f"Supported formats: {', '.join(fetcher.metadata.supported_formats)}",
+            f"Supported formats: {', '.join(fetcher_instance.metadata.supported_formats)}",
             file=sys.stderr,
         )
         raise SystemExit(1)
@@ -142,21 +162,21 @@ def run(args):
 
     # Parse --options JSON argument
     cli_options = None
-    if args.options:
+    if options:
         try:
-            cli_options = json.loads(args.options)
+            cli_options = json.loads(options)
             logger.debug(f"Parsed CLI options: {cli_options}")
         except json.JSONDecodeError as e:
             print(f"Error: Invalid JSON in --options argument: {e}", file=sys.stderr)
             raise SystemExit(1)
 
     # Merge CLI options with config
-    fetcher_options = merge_cli_options(fetcher.metadata.name, cli_options)
+    fetcher_options = merge_cli_options(fetcher_instance.metadata.name, cli_options)
     logger.debug(f"Final fetcher options: {fetcher_options}")
 
     try:
-        result = fetcher.fetch_with_cache(
-            url=args.url,
+        result = fetcher_instance.fetch_with_cache(
+            url=url,
             output_format=output_format,
             cache_ttl=get_default_cache_ttl(),
             fetch_options=fetcher_options,

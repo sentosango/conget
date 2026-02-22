@@ -132,9 +132,11 @@ class BaseFetcher(ABC):
             >>> if __name__ == "__main__":
             ...     MyFetcher.run_cli()
         """
-        import argparse
         import logging
         import sys
+        from typing import Annotated
+
+        import typer
 
         from .config import get_default_format
 
@@ -149,77 +151,88 @@ class BaseFetcher(ABC):
 
         supported_formats = fetcher.metadata.supported_formats
 
+        # Create typer app
+        app = typer.Typer(
+            add_completion=False,
+            no_args_is_help=False,
+        )
+
+        def _run(
+            url: Annotated[str, typer.Argument(help=url_help)],
+            format: Annotated[
+                str | None,
+                typer.Option(
+                    "-f",
+                    "--format",
+                    help=f"Output format (default: from config or 'markdown'). Supported: {', '.join(supported_formats)}",
+                ),
+            ] = None,
+            verbose: Annotated[
+                bool,
+                typer.Option("-v", "--verbose", help="Enable verbose logging"),
+            ] = False,
+            options: Annotated[
+                str | None,
+                typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')'),
+            ] = None,
+        ) -> None:
+            # Setup logging
+            logging.basicConfig(level=logging.DEBUG if verbose else logging.WARNING)
+
+            # Get format (from args or config)
+            format_val = format or get_default_format()
+
+            # Validate format is supported
+            if format_val not in supported_formats:
+                logger.error(
+                    f"Format '{format_val}' not supported by {fetcher.metadata.name}. "
+                    f"Supported formats: {', '.join(supported_formats)}"
+                )
+                print(
+                    f"Error: Format '{format_val}' not supported. "
+                    f"Supported formats: {', '.join(supported_formats)}",
+                    file=sys.stderr,
+                )
+                raise SystemExit(1)
+
+            # Parse fetch options from --options argument
+            fetch_options = None
+            if options:
+                try:
+                    fetch_options = json.loads(options)
+                    logger.debug(f"Parsed fetch options: {fetch_options}")
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Failed to parse --options JSON: {e}. Ignoring options.")
+                    fetch_options = None
+
+            # Merge CLI options with config and defaults
+            merged_options = merge_cli_options(fetcher.metadata.name, fetch_options)
+            logger.debug(f"Using merged options: {merged_options}")
+
+            # Fetch and print content
+            try:
+                from .config import get_default_cache_ttl
+                result = fetcher.fetch_with_cache(
+                    url,
+                    output_format=format_val,
+                    cache_ttl=get_default_cache_ttl(),
+                    fetch_options=merged_options if merged_options else None,
+                )
+                print(result.content)
+            except Exception as e:
+                logger.error(f"Error: {e}")
+                print(f"Error: {e}", file=sys.stderr)
+                raise SystemExit(1)
+
+        # Override help text
+        app.command(
+            name="",
+            help=description,
+        )(_run)
+
         # Show help if no arguments provided
         if len(sys.argv) == 1:
             sys.argv.append("--help")
 
-        # Create argument parser
-        parser = argparse.ArgumentParser(description=description)
-        parser.add_argument("url", help=url_help)
-        parser.add_argument(
-            "--format",
-            "-f",
-            choices=supported_formats,
-            help="Output format (default: from config or 'markdown')",
-        )
-        parser.add_argument(
-            "--verbose",
-            "-v",
-            action="store_true",
-            help="Enable verbose logging",
-        )
-        parser.add_argument(
-            "--options",
-            type=str,
-            help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')',
-        )
-
-        args = parser.parse_args()
-
-        # Setup logging
-        logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)
-
-        # Get format (from args or config)
-        format = args.format or get_default_format()
-
-        # Validate format is supported
-        if format not in supported_formats:
-            logger.error(
-                f"Format '{format}' not supported by {fetcher.metadata.name}. "
-                f"Supported formats: {', '.join(supported_formats)}"
-            )
-            print(
-                f"Error: Format '{format}' not supported. "
-                f"Supported formats: {', '.join(supported_formats)}",
-                file=sys.stderr,
-            )
-            raise SystemExit(1)
-
-        # Parse fetch options from --options argument
-        fetch_options = None
-        if args.options:
-            try:
-                fetch_options = json.loads(args.options)
-                logger.debug(f"Parsed fetch options: {fetch_options}")
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse --options JSON: {e}. Ignoring options.")
-                fetch_options = None
-
-        # Merge CLI options with config and defaults
-        merged_options = merge_cli_options(fetcher.metadata.name, fetch_options)
-        logger.debug(f"Using merged options: {merged_options}")
-
-        # Fetch and print content
-        try:
-            from .config import get_default_cache_ttl
-            result = fetcher.fetch_with_cache(
-                args.url,
-                output_format=format,
-                cache_ttl=get_default_cache_ttl(),
-                fetch_options=merged_options if merged_options else None,
-            )
-            print(result.content)
-        except Exception as e:
-            logger.error(f"Error: {e}")
-            print(f"Error: {e}", file=sys.stderr)
-            raise SystemExit(1)
+        # Run the typer app
+        app()

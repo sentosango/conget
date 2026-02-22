@@ -1,6 +1,9 @@
 """Analyze command for conget CLI."""
 
 import logging
+from typing import Annotated
+
+import typer
 
 from src.core.registry import get_fetchers
 from src.core.types import AnalysisResult, ConfigOption, FetcherMatch
@@ -8,11 +11,13 @@ from src.core.types import AnalysisResult, ConfigOption, FetcherMatch
 logger = logging.getLogger(__name__)
 
 
-def run(args):
+def analyze(
+    urls: Annotated[list[str], typer.Argument(help="URLs to analyze")],
+):
     """Execute the analyze command.
 
     Args:
-        args: Parsed command-line arguments.
+        urls: URLs to analyze.
     """
     fetchers = get_fetchers()
 
@@ -20,7 +25,7 @@ def run(args):
         print("No fetchers available")
         return
 
-    for url in args.urls:
+    for url in urls:
         print(f"\n{url}:")
         print("-" * len(url))
 
