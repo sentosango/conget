@@ -173,7 +173,7 @@ class BaseFetcher(ABC):
             ] = False,
             options: Annotated[
                 str | None,
-                typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')'),
+                typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"option": "value"}\')'),
             ] = None,
         ) -> None:
             # Setup logging

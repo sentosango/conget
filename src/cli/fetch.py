@@ -121,7 +121,7 @@ def fetch(
         bool, typer.Option("--list-fetchers", help="List all available fetchers for URL")
     ] = False,
     options: Annotated[
-        str | None, typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"with_subs": false}\')')
+        str | None, typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"option": "value"}\')')
     ] = None,
 ):
     """Execute the fetch command.
