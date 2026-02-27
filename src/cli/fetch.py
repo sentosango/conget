@@ -60,7 +60,10 @@ def select_best_fetcher(
         fetcher = cls()
         if fetcher.metadata.is_special and fetcher.can_fetch(url):
             # Check format compatibility
-            if output_format is None or output_format in fetcher.metadata.supported_formats:
+            if (
+                output_format is None
+                or output_format in fetcher.metadata.supported_formats
+            ):
                 logger.debug(f"Selected specialized fetcher: {name}")
                 return name
 
@@ -111,17 +114,28 @@ def fetch(
     ],
     fetcher: Annotated[
         str | None,
-        typer.Option("-F", "--fetcher", help="Specific fetcher to use (default: auto-select)", autocompletion=complete_fetcher),
+        typer.Option(
+            "-F",
+            "--fetcher",
+            help="Specific fetcher to use (default: auto-select)",
+            autocompletion=complete_fetcher,
+        ),
     ] = None,
     format: Annotated[
         str | None,
-        typer.Option("-f", "--format", help="Output format", autocompletion=complete_format),
+        typer.Option(
+            "-f", "--format", help="Output format", autocompletion=complete_format
+        ),
     ] = None,
     list_fetchers: Annotated[
-        bool, typer.Option("--list-fetchers", help="List all available fetchers for URL")
+        bool,
+        typer.Option("--list-fetchers", help="List all available fetchers for URL"),
     ] = False,
     options: Annotated[
-        str | None, typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"option": "value"}\')')
+        str | None,
+        typer.Option(
+            "--options", help='Fetcher options as JSON (e.g., \'{"option": "value"}\')'
+        ),
     ] = None,
 ):
     """Execute the fetch command.

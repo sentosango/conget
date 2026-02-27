@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
 from src.core.cache import CacheManager
-from src.core.config import get_section_config, merge_cli_options
+from src.core.config import merge_cli_options
 from src.core.types import FetcherMetadata, FetchResult
 
 logger = logging.getLogger(__name__)
@@ -173,7 +173,10 @@ class BaseFetcher(ABC):
             ] = False,
             options: Annotated[
                 str | None,
-                typer.Option("--options", help='Fetcher options as JSON (e.g., \'{"option": "value"}\')'),
+                typer.Option(
+                    "--options",
+                    help='Fetcher options as JSON (e.g., \'{"option": "value"}\')',
+                ),
             ] = None,
         ) -> None:
             # Setup logging
@@ -202,7 +205,9 @@ class BaseFetcher(ABC):
                     fetch_options = json.loads(options)
                     logger.debug(f"Parsed fetch options: {fetch_options}")
                 except json.JSONDecodeError as e:
-                    logger.warning(f"Failed to parse --options JSON: {e}. Ignoring options.")
+                    logger.warning(
+                        f"Failed to parse --options JSON: {e}. Ignoring options."
+                    )
                     fetch_options = None
 
             # Merge CLI options with config and defaults
@@ -212,6 +217,7 @@ class BaseFetcher(ABC):
             # Fetch and print content
             try:
                 from .config import get_default_cache_ttl
+
                 result = fetcher.fetch_with_cache(
                     url,
                     output_format=format_val,

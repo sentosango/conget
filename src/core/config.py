@@ -12,10 +12,12 @@ from platformdirs import user_config_dir
 @dataclass
 class AddedItem:
     """Represents an item added during config upgrade."""
+
     type: str  # "section" or "option"
     section: str
     name: str  # section name for type=section, option name for type=option
     value: Any | None = None  # option value for type=option
+
 
 logger = logging.getLogger(__name__)
 
@@ -227,7 +229,9 @@ def merge_cli_options(
     Returns:
         Merged options dict with final values
     """
-    logger.debug(f"merge_cli_options called for fetcher={fetcher_name}, cli_options={cli_options}")
+    logger.debug(
+        f"merge_cli_options called for fetcher={fetcher_name}, cli_options={cli_options}"
+    )
 
     # Get config section for this fetcher
     config_values = get_section_config(fetcher_name)
@@ -246,7 +250,9 @@ def merge_cli_options(
             if fetcher.metadata.name == fetcher_name:
                 for opt_name, opt_def in fetcher.metadata.config_options.items():
                     metadata_defaults[opt_name] = opt_def.default
-                logger.debug(f"Metadata defaults for {fetcher_name}: {metadata_defaults}")
+                logger.debug(
+                    f"Metadata defaults for {fetcher_name}: {metadata_defaults}"
+                )
                 break
         except Exception as e:
             logger.warning(f"Failed to load fetcher for defaults: {e}")
@@ -298,7 +304,9 @@ def upgrade_config() -> tuple[bool, list[AddedItem] | str]:
         for section_name, section_options in fetcher_options.items():
             added_items.append(AddedItem("section", section_name, section_name))
             for option_name, option_def in section_options.items():
-                added_items.append(AddedItem("option", section_name, option_name, option_def.default))
+                added_items.append(
+                    AddedItem("option", section_name, option_name, option_def.default)
+                )
         return (True, added_items)
 
     # Load existing config as TOML document (preserves comments)
@@ -340,7 +348,9 @@ def upgrade_config() -> tuple[bool, list[AddedItem] | str]:
                 item.comment(desc)
                 section.add(option_name, item)
 
-                added_items.append(AddedItem("option", section_name, option_name, default))
+                added_items.append(
+                    AddedItem("option", section_name, option_name, default)
+                )
                 sections_with_additions.add(section_name)
                 logger.info(f"Added new option: {section_name}.{option_name}")
 

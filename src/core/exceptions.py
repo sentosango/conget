@@ -36,7 +36,9 @@ class ParsingError(CongetError):
 class UnsupportedFormatError(CongetError):
     """Error when format is not supported by the fetcher."""
 
-    def __init__(self, message: str, output_format: str, supported: list[str] | None = None):
+    def __init__(
+        self, message: str, output_format: str, supported: list[str] | None = None
+    ):
         """Initialize UnsupportedFormatError.
 
         Args:

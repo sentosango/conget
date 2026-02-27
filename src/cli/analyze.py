@@ -6,7 +6,7 @@ from typing import Annotated, List
 import typer
 
 from src.core.registry import get_fetchers
-from src.core.types import AnalysisResult, ConfigOption, FetcherMatch
+from src.core.types import AnalysisResult, FetcherMatch
 
 logger = logging.getLogger(__name__)
 
@@ -65,4 +65,6 @@ def analyze(
             if match.config_options:
                 print("    Options:")
                 for option_name, option in match.config_options.items():
-                    print(f"      {option_name}: {option.description} (default: {repr(option.default)})")
+                    print(
+                        f"      {option_name}: {option.description} (default: {repr(option.default)})"
+                    )

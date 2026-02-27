@@ -52,7 +52,9 @@ class GitHubRepoFetcher(BaseFetcher):
         """
         return bool(GITHUB_REPO_PATTERN.match(url))
 
-    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
+    def fetch(
+        self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None
+    ) -> FetchResult:
         """Fetch content from the URL in the specified format.
 
         Args:
@@ -100,9 +102,7 @@ class GitHubRepoFetcher(BaseFetcher):
         if downloaded is None:
             # Try the other branch as fallback
             fallback_branch = "master" if prefer_branch == "main" else "main"
-            readme_url = (
-                f"https://raw.githubusercontent.com/{owner}/{repo}/{fallback_branch}/README.md"
-            )
+            readme_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{fallback_branch}/README.md"
             logger.debug(f"Trying {fallback_branch} branch: {readme_url}")
             downloaded = trafilatura.fetch_url(readme_url)
 

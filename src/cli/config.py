@@ -3,8 +3,6 @@
 import logging
 from typing import Any
 
-import typer
-
 
 def _format_value(value: Any) -> str:
     """Format a value for display as it appears in TOML."""
@@ -63,6 +61,8 @@ def config():
 
         if total_options > 0:
             print()
-            print(f"Updated: {total_options} item(s) added in {total_sections} section(s)")
+            print(
+                f"Updated: {total_options} item(s) added in {total_sections} section(s)"
+            )
     else:
         print("Already up to date")

@@ -52,7 +52,9 @@ class HHVacancyFetcher(BaseFetcher):
     def can_fetch(self, url: str) -> bool:
         return bool(HH_VACANCY_PATTERN.match(url))
 
-    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
+    def fetch(
+        self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None
+    ) -> FetchResult:
         fetch_options = fetch_options or {}
 
         if output_format not in self.metadata.supported_formats:

@@ -61,7 +61,9 @@ class HHEmployerFetcher(BaseFetcher):
     def can_fetch(self, url: str) -> bool:
         return bool(HH_EMPLOYER_PATTERN.match(url))
 
-    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
+    def fetch(
+        self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None
+    ) -> FetchResult:
         fetch_options = fetch_options or {}
 
         if output_format not in self.metadata.supported_formats:
@@ -105,7 +107,9 @@ class HHEmployerFetcher(BaseFetcher):
             metadata={"employer_id": employer_id},
         )
 
-    def _fetch_employer_data(self, employer_id: str, timeout: int = 30) -> Dict[str, Any]:
+    def _fetch_employer_data(
+        self, employer_id: str, timeout: int = 30
+    ) -> Dict[str, Any]:
         """Fetch employer data from hh.ru API."""
         url = f"{self.base_url}/employers/{employer_id}"
         logger.debug(f"Fetching from API: {url}")

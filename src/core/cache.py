@@ -62,7 +62,9 @@ class CacheManager:
         return self.cache_dir / f"{key_hash}.json"
 
     @staticmethod
-    def generate_key(url: str, output_format: str, options: Optional[Dict[str, Any]] = None) -> str:
+    def generate_key(
+        url: str, output_format: str, options: Optional[Dict[str, Any]] = None
+    ) -> str:
         """Generate a cache key from fetch parameters.
 
         Args:

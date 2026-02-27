@@ -43,7 +43,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "options": {
                         "type": "object",
-                        "description": "Fetcher-specific options (e.g., {\"with_subs\": false})",
+                        "description": 'Fetcher-specific options (e.g., {"with_subs": false})',
                     },
                 },
                 "required": ["url"],
@@ -162,7 +162,7 @@ async def analyze_urls_handler(arguments: Any) -> list[TextContent]:
             output_lines.append(f"    Formats: {', '.join(f['formats'])}")
             output_lines.append(f"    Description: {f['description']}")
             if f["config_options"]:
-                output_lines.append(f"    Config Options:")
+                output_lines.append("    Config Options:")
                 for opt_name, opt_info in f["config_options"].items():
                     output_lines.append(
                         f"      {opt_name}: {opt_info['default']} - {opt_info['description']}"

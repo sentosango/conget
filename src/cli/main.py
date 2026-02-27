@@ -2,7 +2,7 @@
 
 import logging
 import sys
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 
@@ -20,7 +20,9 @@ app = typer.Typer(
 
 @app.callback()
 def main(
-    verbose: Annotated[bool, typer.Option("-v", "--verbose", help="Enable verbose logging")] = False,
+    verbose: Annotated[
+        bool, typer.Option("-v", "--verbose", help="Enable verbose logging")
+    ] = False,
 ):
     """Conget - Simple CLI for fetching web content with plugin architecture."""
     state["verbose"] = verbose
@@ -39,16 +41,29 @@ app.command(name="config")(config.config)
 def mcp_cmd():
     """Start MCP server."""
     from src.cli.mcp import run
+
     run(None)
 
 
 def main_entry():
     """Entry point for the CLI."""
     # Check if first positional argument is a known command
-    known_commands = {"fetch", "list", "analyze", "mcp", "config", "--help", "--version", "--install-completion", "--show-completion"}
+    known_commands = {
+        "fetch",
+        "list",
+        "analyze",
+        "mcp",
+        "config",
+        "--help",
+        "--version",
+        "--install-completion",
+        "--show-completion",
+    }
 
     # Check for completion-related flags (skip implicit fetch for these)
-    has_completion_flag = "--install-completion" in sys.argv or "--show-completion" in sys.argv
+    has_completion_flag = (
+        "--install-completion" in sys.argv or "--show-completion" in sys.argv
+    )
 
     # Find first positional argument (not starting with -)
     first_pos_arg = None
@@ -58,7 +73,11 @@ def main_entry():
             break
 
     # If first arg is not a known command and no completion flag, treat as implicit fetch
-    if not has_completion_flag and first_pos_arg and first_pos_arg not in known_commands:
+    if (
+        not has_completion_flag
+        and first_pos_arg
+        and first_pos_arg not in known_commands
+    ):
         logging.debug(
             f"No command specified, treating '{first_pos_arg}' as URL for implicit fetch"
         )

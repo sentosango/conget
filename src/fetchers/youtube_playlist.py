@@ -22,9 +22,13 @@ logger = logging.getLogger(__name__)
 # YouTube playlist URL patterns
 YOUTUBE_PLAYLIST_PATTERNS = [
     # Standard playlist format
-    re.compile(r"(?:https?://)?(?:www\.|m\.)?youtube\.com/playlist\?list=([a-zA-Z0-9_-]+)"),
+    re.compile(
+        r"(?:https?://)?(?:www\.|m\.)?youtube\.com/playlist\?list=([a-zA-Z0-9_-]+)"
+    ),
     # Embed format for playlists
-    re.compile(r"(?:https?://)?(?:www\.)?youtube\.com/embed/videoseries\?list=([a-zA-Z0-9_-]+)"),
+    re.compile(
+        r"(?:https?://)?(?:www\.)?youtube\.com/embed/videoseries\?list=([a-zA-Z0-9_-]+)"
+    ),
     # List parameter in any URL (watch, etc.) - use simple pattern that searches for list= anywhere
     re.compile(r"[?&]list=([a-zA-Z0-9_-]+)"),
 ]
@@ -100,7 +104,9 @@ class YoutubePlaylistFetcher(BaseFetcher):
         """
         return extract_playlist_id(url) is not None
 
-    def fetch(self, url: str, output_format: str, fetch_options: dict[str, Any] | None = None) -> FetchResult:
+    def fetch(
+        self, url: str, output_format: str, fetch_options: dict[str, Any] | None = None
+    ) -> FetchResult:
         """Fetch playlist metadata from the URL in the specified format.
 
         Args:
@@ -175,8 +181,12 @@ class YoutubePlaylistFetcher(BaseFetcher):
             raise FetchError(f"No metadata returned for playlist {playlist_id}")
 
         # Extract relevant fields
-        playlist_data = self._extract_fields(info_dict, playlist_id, canonical_url, with_list)
-        logger.debug(f"Extracted playlist data: id={playlist_data['id']}, title={playlist_data['title']}, video_count={playlist_data['video_count']}")
+        playlist_data = self._extract_fields(
+            info_dict, playlist_id, canonical_url, with_list
+        )
+        logger.debug(
+            f"Extracted playlist data: id={playlist_data['id']}, title={playlist_data['title']}, video_count={playlist_data['video_count']}"
+        )
 
         # Format output
         content = self._format_output(playlist_data, output_format, with_list)
@@ -190,7 +200,11 @@ class YoutubePlaylistFetcher(BaseFetcher):
         )
 
     def _extract_fields(
-        self, info: dict[str, Any], playlist_id: str, canonical_url: str, with_list: bool
+        self,
+        info: dict[str, Any],
+        playlist_id: str,
+        canonical_url: str,
+        with_list: bool,
     ) -> dict[str, Any]:
         """Extract relevant metadata fields from yt-dlp info dict.
 
@@ -222,7 +236,9 @@ class YoutubePlaylistFetcher(BaseFetcher):
                     video_data = {
                         "id": entry.get("id", ""),
                         "title": entry.get("title", ""),
-                        "url": f"https://www.youtube.com/watch?v={entry.get('id', '')}" if entry.get("id") else "",
+                        "url": f"https://www.youtube.com/watch?v={entry.get('id', '')}"
+                        if entry.get("id")
+                        else "",
                         "duration": entry.get("duration"),
                         "duration_string": entry.get("duration_string", ""),
                     }
@@ -233,7 +249,9 @@ class YoutubePlaylistFetcher(BaseFetcher):
 
         return result
 
-    def _format_output(self, data: dict[str, Any], output_format: str, with_list: bool) -> str:
+    def _format_output(
+        self, data: dict[str, Any], output_format: str, with_list: bool
+    ) -> str:
         """Format playlist data for output.
 
         Args:
@@ -255,7 +273,7 @@ class YoutubePlaylistFetcher(BaseFetcher):
             f"**URL:** {data['url']}",
         ]
 
-        if data['channel_url']:
+        if data["channel_url"]:
             lines.append(f"**Channel:** [{data['channel']}]({data['channel_url']})")
         else:
             lines.append(f"**Channel:** {data['channel']}")
@@ -264,19 +282,21 @@ class YoutubePlaylistFetcher(BaseFetcher):
         lines.append("")
         lines.append("## Description")
         lines.append("")
-        lines.append(data['description'] or "(no description)")
+        lines.append(data["description"] or "(no description)")
 
         # Add video list if requested
-        if with_list and data.get('videos'):
+        if with_list and data.get("videos"):
             lines.append("")
             lines.append("## Videos")
             lines.append("")
 
-            for i, video in enumerate(data['videos'], 1):
-                duration = video.get('duration_string', '')
+            for i, video in enumerate(data["videos"], 1):
+                duration = video.get("duration_string", "")
                 duration_str = f" - {duration}" if duration else ""
-                if video['url']:
-                    lines.append(f"{i}. [{video['title']}]({video['url']}){duration_str}")
+                if video["url"]:
+                    lines.append(
+                        f"{i}. [{video['title']}]({video['url']}){duration_str}"
+                    )
                 else:
                     lines.append(f"{i}. {video['title']}{duration_str}")
 

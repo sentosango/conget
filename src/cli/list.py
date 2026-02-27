@@ -11,7 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 def list_cmd(
-    format: Annotated[str | None, typer.Option("-f", "--format", help="Show fetchers supporting this format")] = None,
+    format: Annotated[
+        str | None,
+        typer.Option("-f", "--format", help="Show fetchers supporting this format"),
+    ] = None,
 ):
     """Execute the list command.
 
@@ -42,6 +45,8 @@ def list_cmd(
         if fetcher.metadata.config_options:
             print("    Options:")
             for option_name, option in fetcher.metadata.config_options.items():
-                print(f"      {option_name}: {option.description} (default: {repr(option.default)})")
+                print(
+                    f"      {option_name}: {option.description} (default: {repr(option.default)})"
+                )
 
         print()

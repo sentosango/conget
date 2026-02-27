@@ -95,7 +95,9 @@ class YoutubeVideoFetcher(BaseFetcher):
         """
         return extract_video_id(url) is not None
 
-    def fetch(self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None) -> FetchResult:
+    def fetch(
+        self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None
+    ) -> FetchResult:
         """Fetch video metadata from the URL in the specified format.
 
         Args:
@@ -177,8 +179,12 @@ class YoutubeVideoFetcher(BaseFetcher):
             raise FetchError(f"No metadata returned for video {video_id}")
 
         # Extract relevant fields
-        video_data = self._extract_fields(info_dict, video_id, canonical_url, lang, with_subs)
-        logger.debug(f"Extracted video data: id={video_data['id']}, title={video_data['title']}")
+        video_data = self._extract_fields(
+            info_dict, video_id, canonical_url, lang, with_subs
+        )
+        logger.debug(
+            f"Extracted video data: id={video_data['id']}, title={video_data['title']}"
+        )
 
         # Format output
         content = self._format_output(video_data, output_format)
@@ -191,7 +197,14 @@ class YoutubeVideoFetcher(BaseFetcher):
             metadata=video_data,
         )
 
-    def _extract_fields(self, info: dict[str, Any], video_id: str, canonical_url: str, lang: str, with_subs: bool) -> dict[str, Any]:
+    def _extract_fields(
+        self,
+        info: dict[str, Any],
+        video_id: str,
+        canonical_url: str,
+        lang: str,
+        with_subs: bool,
+    ) -> dict[str, Any]:
         """Extract relevant metadata fields from yt-dlp info dict.
 
         Args:
@@ -232,7 +245,9 @@ class YoutubeVideoFetcher(BaseFetcher):
 
         return result
 
-    def _extract_subtitles(self, info: dict[str, Any], lang: str) -> dict[str, Any] | None:
+    def _extract_subtitles(
+        self, info: dict[str, Any], lang: str
+    ) -> dict[str, Any] | None:
         """Extract subtitle content from yt-dlp info dict.
 
         Args:
@@ -242,6 +257,7 @@ class YoutubeVideoFetcher(BaseFetcher):
         Returns:
             Dictionary with lang and text keys, or None if no subtitles found
         """
+
         def _fetch_subtitle_text(url: str) -> str | None:
             """Fetch subtitle JSON from URL and extract text."""
             try:
@@ -270,7 +286,11 @@ class YoutubeVideoFetcher(BaseFetcher):
         if lang in subtitles:
             lang_subtitles = subtitles[lang]
             if lang_subtitles:
-                subtitle_entry = lang_subtitles[0] if isinstance(lang_subtitles, list) else lang_subtitles
+                subtitle_entry = (
+                    lang_subtitles[0]
+                    if isinstance(lang_subtitles, list)
+                    else lang_subtitles
+                )
                 if "data" in subtitle_entry:
                     logger.debug(f"Found manual subtitles in language: {lang}")
                     return {"lang": lang, "text": subtitle_entry["data"]}
@@ -285,11 +305,17 @@ class YoutubeVideoFetcher(BaseFetcher):
         if lang in auto_captions:
             lang_captions = auto_captions[lang]
             if lang_captions:
-                caption_entry = lang_captions[0] if isinstance(lang_captions, list) else lang_captions
+                caption_entry = (
+                    lang_captions[0]
+                    if isinstance(lang_captions, list)
+                    else lang_captions
+                )
                 if "url" in caption_entry:
                     text = _fetch_subtitle_text(caption_entry["url"])
                     if text:
-                        logger.debug(f"Using auto-generated captions in language: {lang}")
+                        logger.debug(
+                            f"Using auto-generated captions in language: {lang}"
+                        )
                         return {"lang": lang, "text": text}
 
         # Try any available manual subtitle
@@ -297,14 +323,20 @@ class YoutubeVideoFetcher(BaseFetcher):
             first_lang = next(iter(subtitles))
             if first_lang:
                 first_subtitles = subtitles[first_lang]
-                subtitle_entry = first_subtitles[0] if isinstance(first_subtitles, list) else first_subtitles
+                subtitle_entry = (
+                    first_subtitles[0]
+                    if isinstance(first_subtitles, list)
+                    else first_subtitles
+                )
                 if "data" in subtitle_entry:
                     logger.debug(f"Using manual subtitles in language: {first_lang}")
                     return {"lang": first_lang, "text": subtitle_entry["data"]}
                 elif "url" in subtitle_entry:
                     text = _fetch_subtitle_text(subtitle_entry["url"])
                     if text:
-                        logger.debug(f"Using manual subtitles in language: {first_lang}")
+                        logger.debug(
+                            f"Using manual subtitles in language: {first_lang}"
+                        )
                         return {"lang": first_lang, "text": text}
 
         # Try any available auto caption
@@ -312,14 +344,20 @@ class YoutubeVideoFetcher(BaseFetcher):
             first_lang = next(iter(auto_captions))
             if first_lang:
                 first_captions = auto_captions[first_lang]
-                caption_entry = first_captions[0] if isinstance(first_captions, list) else first_captions
+                caption_entry = (
+                    first_captions[0]
+                    if isinstance(first_captions, list)
+                    else first_captions
+                )
                 if "url" in caption_entry:
                     text = _fetch_subtitle_text(caption_entry["url"])
                     if text:
-                        logger.debug(f"Using auto-generated captions in language: {first_lang}")
+                        logger.debug(
+                            f"Using auto-generated captions in language: {first_lang}"
+                        )
                         return {"lang": first_lang, "text": text}
 
-        logger.debug(f"No subtitles found for video")
+        logger.debug("No subtitles found for video")
         return None
 
     def _format_output(self, data: dict[str, Any], output_format: str) -> str:
@@ -340,41 +378,57 @@ class YoutubeVideoFetcher(BaseFetcher):
             f"# {data['title']}",
             "",
             f"**URL:** {data['url']}",
-            f"**Channel:** [{data['channel']}]({data['channel_url']})" if data['channel_url'] else f"**Channel:** {data['channel']}",
-            f"**Duration:** {data['duration_string']}" if data['duration_string'] else "",
-            f"**Views:** {data['view_count']:,}" if data['view_count'] is not None else "",
-            f"**Likes:** {data['like_count']:,}" if data['like_count'] is not None else "",
-            f"**Upload Date:** {self._format_date(data['upload_date'])}" if data['upload_date'] else "",
+            f"**Channel:** [{data['channel']}]({data['channel_url']})"
+            if data["channel_url"]
+            else f"**Channel:** {data['channel']}",
+            f"**Duration:** {data['duration_string']}"
+            if data["duration_string"]
+            else "",
+            f"**Views:** {data['view_count']:,}"
+            if data["view_count"] is not None
+            else "",
+            f"**Likes:** {data['like_count']:,}"
+            if data["like_count"] is not None
+            else "",
+            f"**Upload Date:** {self._format_date(data['upload_date'])}"
+            if data["upload_date"]
+            else "",
             "",
             "## Description",
             "",
-            data['description'] or "(no description)",
+            data["description"] or "(no description)",
         ]
 
         # Add tags if present
-        if data['tags']:
-            lines.extend([
-                "",
-                "## Tags",
-                "",
-                ", ".join(data['tags'][:10]),  # Limit to 10 tags
-            ])
+        if data["tags"]:
+            lines.extend(
+                [
+                    "",
+                    "## Tags",
+                    "",
+                    ", ".join(data["tags"][:10]),  # Limit to 10 tags
+                ]
+            )
 
         # Add subtitles if present
-        if data.get('subtitles'):
-            subtitles = data['subtitles']
+        if data.get("subtitles"):
+            subtitles = data["subtitles"]
             # Add blockquote indentation to each line of subtitle text
-            sub_text = subtitles.get('text', '(no text)')
-            indented_text = "\n".join(f"    {line}" for line in sub_text.split("\n") if line.strip())
+            sub_text = subtitles.get("text", "(no text)")
+            indented_text = "\n".join(
+                f"    {line}" for line in sub_text.split("\n") if line.strip()
+            )
 
-            lines.extend([
-                "",
-                "## Subtitles",
-                "",
-                f"**Language:** {subtitles.get('lang', 'unknown')}",
-                "",
-                indented_text,
-            ])
+            lines.extend(
+                [
+                    "",
+                    "## Subtitles",
+                    "",
+                    f"**Language:** {subtitles.get('lang', 'unknown')}",
+                    "",
+                    indented_text,
+                ]
+            )
 
         # Filter out empty lines from optional fields
         markdown = "\n".join(line for line in lines if line is not None)
