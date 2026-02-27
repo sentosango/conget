@@ -153,7 +153,7 @@ class YoutubePlaylistFetcher(BaseFetcher):
 
         # yt-dlp options for metadata extraction only
         # extract_flat='in_playlist' for fast video list without full extraction
-        ydl_opts = {
+        ydl_opts: dict[str, Any] = {
             "quiet": True,
             "no_warnings": True,
             "extract_flat": "in_playlist",
@@ -167,7 +167,7 @@ class YoutubePlaylistFetcher(BaseFetcher):
         logger.debug(f"Extracting metadata with yt-dlp, lang={lang}")
 
         try:
-            with YoutubeDL(ydl_opts) as ydl:
+            with YoutubeDL(ydl_opts) as ydl:  # type: ignore[arg-type]
                 info = ydl.extract_info(canonical_url, download=False)
                 info_dict = ydl.sanitize_info(info)
         except (DownloadError, ExtractorError) as e:
@@ -182,7 +182,10 @@ class YoutubePlaylistFetcher(BaseFetcher):
 
         # Extract relevant fields
         playlist_data = self._extract_fields(
-            info_dict, playlist_id, canonical_url, with_list
+            info_dict,  # type: ignore[arg-type]
+            playlist_id,
+            canonical_url,
+            with_list,
         )
         logger.debug(
             f"Extracted playlist data: id={playlist_data['id']}, title={playlist_data['title']}, video_count={playlist_data['video_count']}"

@@ -145,7 +145,7 @@ class YoutubeVideoFetcher(BaseFetcher):
         logger.debug(f"with_subs: raw={with_subs_raw!r}, converted={with_subs}")
 
         # yt-dlp options for metadata extraction only
-        ydl_opts = {
+        ydl_opts: dict[str, Any] = {
             "quiet": True,
             "no_warnings": True,
             "extract_flat": False,
@@ -165,7 +165,7 @@ class YoutubeVideoFetcher(BaseFetcher):
         logger.debug(f"Extracting metadata with yt-dlp, lang={lang}")
 
         try:
-            with YoutubeDL(ydl_opts) as ydl:
+            with YoutubeDL(ydl_opts) as ydl:  # type: ignore[arg-type]
                 info = ydl.extract_info(canonical_url, download=False)
                 info_dict = ydl.sanitize_info(info)
         except (DownloadError, ExtractorError) as e:
@@ -180,7 +180,11 @@ class YoutubeVideoFetcher(BaseFetcher):
 
         # Extract relevant fields
         video_data = self._extract_fields(
-            info_dict, video_id, canonical_url, lang, with_subs
+            info_dict,  # type: ignore[arg-type]
+            video_id,
+            canonical_url,
+            lang,
+            with_subs,
         )
         logger.debug(
             f"Extracted video data: id={video_data['id']}, title={video_data['title']}"
