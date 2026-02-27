@@ -83,8 +83,8 @@ class HHEmployerFetcher(BaseFetcher):
 
         # Get timeout from fetch_options or use default
         timeout = fetch_options.get(
-            key="timeout",
-            default=self.metadata.config_options["timeout"].default,
+            "timeout",
+            self.metadata.config_options["timeout"].default,
         )
         logger.debug(f"Using timeout: {timeout}")
 
