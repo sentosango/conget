@@ -127,7 +127,7 @@ class GitHubRepoFetcher(BaseFetcher):
             content = re.sub(r"\*\*([^*]+)\*\*", r"\1", content)
             content = re.sub(r"\*([^*]+)\*", r"\1", content)
             # Remove links [text](url) -> text
-            content = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", content)
+            content = re.sub(r"\[([^]]+)]\([^)]+\)", r"\1", content)
             # Remove code blocks
             content = re.sub(r"```[\s\S]*?```", "", content)
             content = re.sub(r"`([^`]+)`", r"\1", content)
