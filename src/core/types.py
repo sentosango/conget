@@ -116,39 +116,3 @@ class FetcherMatch:
         if self.is_special != other.is_special:
             return self.is_special > other.is_special
         return self.name < other.name
-
-
-@dataclass
-class AnalysisResult:
-    """Represents the result of analyzing which fetchers can handle a URL.
-
-    Attributes:
-        url: The URL that was analyzed
-        matches: List of fetchers that can handle this URL
-    """
-
-    url: str
-    matches: List[FetcherMatch] = field(default_factory=list)
-
-    def __post_init__(self):
-        """Sort matches with special fetchers first."""
-        self.matches = sorted(self.matches)
-
-    def has_matches(self) -> bool:
-        """Check if any fetchers are available for this URL.
-
-        Returns:
-            True if at least one fetcher can handle the URL
-        """
-        return len(self.matches) > 0
-
-    def get_best_match(self) -> Optional[FetcherMatch]:
-        """Get the best matching fetcher.
-
-        Returns the first special fetcher if available, otherwise the first
-        generic fetcher, or None if no fetchers match.
-
-        Returns:
-            The best matching FetcherMatch, or None if no matches
-        """
-        return self.matches[0] if self.matches else None
