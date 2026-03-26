@@ -6,7 +6,7 @@ from typing import Annotated, List
 import typer
 
 from src.core.registry import get_fetchers
-from src.core.types import AnalysisResult, FetcherMatch
+from src.core.types import FetcherMatch
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +51,26 @@ def analyze(
                     )
                 )
 
-        result = AnalysisResult(url=url, matches=matches)
+        # Sort matches to match fetch selection logic:
+        # 1. Special fetchers that can_fetch
+        # 2. Non-special fetchers that can_fetch (except "default")
+        # 3. "default" fetcher
+        # Within each group, sort alphabetically by name
+        def sort_key(m: FetcherMatch) -> tuple[int, str]:
+            if m.is_special:
+                return (0, m.name)
+            elif m.name == "default":
+                return (2, m.name)
+            else:
+                return (1, m.name)
 
-        if not result.has_matches():
+        matches = sorted(matches, key=sort_key)
+
+        if not matches:
             print("  No fetchers available for this URL")
             continue
 
-        for match in result.matches:
+        for match in matches:
             special_marker = " [SPECIAL]" if match.is_special else ""
             print(f"  {match.name}{special_marker}")
             print(f"    Formats: {', '.join(match.supported_formats)}")
