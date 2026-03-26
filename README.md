@@ -9,6 +9,7 @@
   - GitHub репозитории (README.md)
   - Вакансии с HH.ru
   - Информация о работодателях с HH.ru
+  - Сериалы с MyShows.me
 
 - **Несколько форматов вывода:** html, markdown, text, json, xmltei, csv
 
@@ -36,6 +37,7 @@ uv tool install .
 conget https://example.com
 conget https://github.com/user/repo
 conget https://hh.ru/vacancy/123456
+conget https://myshows.me/view/70013/
 
 # С указанием формата
 conget https://example.com --format markdown
@@ -80,6 +82,9 @@ conget-hh-vacancy https://hh.ru/vacancy/123456
 
 # HH работодатели
 conget-hh-employer https://hh.ru/employer/123456
+
+# MyShows сериалы
+conget-myshows-show https://myshows.me/view/70013/
 ```
 
 ### Library API
@@ -165,14 +170,21 @@ timeout = 30               # Таймаут запросов (секунды)
 timeout = 30               # Таймаут запросов (секунды)
 ```
 
+#### MyShows fetcher
+
+```toml
+[myshows-show]
+timeout = 30               # Таймаут запросов (секунды)
+```
+
 ## Доступные форматы
 
 | Формат | Описание | Поддержка по фетчерам |
 |---------|-----------|----------------------|
 | html | Исходный HTML | default |
-| markdown | Markdown формат | default, github-repo, hh-vacancy, hh-employer |
-| text | Чистый текст без форматирования | default, github-repo, hh-vacancy, hh-employer |
-| json | JSON структура | default, github-repo, hh-vacancy, hh-employer |
+| markdown | Markdown формат | default, github-repo, hh-vacancy, hh-employer, myshows-show |
+| text | Чистый текст без форматирования | default, github-repo, hh-vacancy, hh-employer, myshows-show |
+| json | JSON структура | default, github-repo, hh-vacancy, hh-employer, myshows-show |
 | xmltei | XML TEI формат | default |
 | csv | CSV формат | default |
 
