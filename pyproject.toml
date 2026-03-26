@@ -27,10 +27,12 @@ conget-hh-employer = "src.fetchers.hh_employer:cli"
 conget-youtube-video = "src.fetchers.youtube_video:cli"
 conget-youtube-playlist = "src.fetchers.youtube_playlist:cli"
 conget-myshows-show = "src.fetchers.myshows_show:cli"
+conget-default-md = "src.fetchers.default_md:cli"
 
 # Fetcher entry points (for plugins)
 [project.entry-points."conget.fetchers"]
 default = "src.fetchers.default:DefaultFetcher"
+default-md = "src.fetchers.default_md:DefaultMdFetcher"
 github-repo = "src.fetchers.github_repo:GitHubRepoFetcher"
 hh-vacancy = "src.fetchers.hh_vacancy:HHVacancyFetcher"
 hh-employer = "src.fetchers.hh_employer:HHEmployerFetcher"
