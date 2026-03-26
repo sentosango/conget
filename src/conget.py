@@ -100,10 +100,20 @@ class Conget:
         # First, try to find a specialized fetcher that can handle the URL
         for name, cls in self.fetchers.items():
             fetcher = cls()
-            if fetcher.is_special and fetcher.can_fetch(url):
+            if fetcher.metadata.is_special and fetcher.can_fetch(url):
                 # Check format compatibility
-                if format is None or format in fetcher.supported_formats:
+                if format is None or format in fetcher.metadata.supported_formats:
                     logger.debug(f"Selected specialized fetcher: {name}")
+                    return name
+
+        # Try non-special fetchers that can handle the URL (except "default")
+        for name, cls in self.fetchers.items():
+            if name == "default":
+                continue
+            fetcher = cls()
+            if not fetcher.metadata.is_special and fetcher.can_fetch(url):
+                if format is None or format in fetcher.metadata.supported_formats:
+                    logger.debug(f"Selected non-special fetcher: {name}")
                     return name
 
         # Fall back to generic fetcher

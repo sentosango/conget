@@ -67,6 +67,19 @@ def select_best_fetcher(
                 logger.debug(f"Selected specialized fetcher: {name}")
                 return name
 
+    # Try non-special fetchers that can handle the URL (except "default")
+    for name, cls in fetchers.items():
+        if name == "default":
+            continue
+        fetcher = cls()
+        if not fetcher.metadata.is_special and fetcher.can_fetch(url):
+            if (
+                output_format is None
+                or output_format in fetcher.metadata.supported_formats
+            ):
+                logger.debug(f"Selected non-special fetcher: {name}")
+                return name
+
     # Fall back to generic fetcher
     if "default" in fetchers:
         logger.debug("Selected default fetcher")
