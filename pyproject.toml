@@ -36,7 +36,7 @@ hh-vacancy = "src.fetchers.hh_vacancy:HHVacancyFetcher"
 hh-employer = "src.fetchers.hh_employer:HHEmployerFetcher"
 youtube-video = "src.fetchers.youtube_video:YoutubeVideoFetcher"
 youtube-playlist = "src.fetchers.youtube_playlist:YoutubePlaylistFetcher"
-myshows-show = "src.fetchers.myshows_show:MyShowsFetcher"
+myshows-show = "src.fetchers.myshows_show:MyShowsShowFetcher"
 
 [build-system]
 requires = ["hatchling"]

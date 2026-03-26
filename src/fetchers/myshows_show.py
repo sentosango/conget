@@ -1,6 +1,6 @@
 """MyShows.me TV show fetcher.
 
-This module provides the MyShowsFetcher class for fetching TV show data from MyShows.me.
+This module provides the MyShowsShowFetcher class for fetching TV show data from MyShows.me.
 """
 
 import json
@@ -25,10 +25,10 @@ from src.core.formatters import html_to_markdown, markdown_to_text
 logger = logging.getLogger(__name__)
 
 # Pattern for MyShows.me show URLs (supports subdomains like en.myshows.me)
-MYSHOWS_PATTERN = re.compile(r"https?://(?:[\w-]+\.)?myshows\.me/view/(\d+)")
+MYSHOWS_SHOW_PATTERN = re.compile(r"https?://(?:[\w-]+\.)?myshows\.me/view/(\d+)")
 
 
-class MyShowsFetcher(BaseFetcher):
+class MyShowsShowFetcher(BaseFetcher):
     """Fetcher for MyShows.me TV shows using official JSON-RPC API."""
 
     def __init__(self):
@@ -51,7 +51,7 @@ class MyShowsFetcher(BaseFetcher):
 
     def can_fetch(self, url: str) -> bool:
         """Check if URL is a valid MyShows.me show page."""
-        return bool(MYSHOWS_PATTERN.match(url))
+        return bool(MYSHOWS_SHOW_PATTERN.match(url))
 
     def fetch(
         self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None
@@ -68,7 +68,7 @@ class MyShowsFetcher(BaseFetcher):
 
         logger.info(f"Fetching MyShows show {url} with format {output_format}")
 
-        match = MYSHOWS_PATTERN.match(url)
+        match = MYSHOWS_SHOW_PATTERN.match(url)
         if not match:
             raise ValidationError(f"Invalid MyShows.me URL: {url}")
 
@@ -345,7 +345,7 @@ class MyShowsFetcher(BaseFetcher):
 
 def cli():
     """Entry point for console script."""
-    MyShowsFetcher.run_cli(url_help="MyShows.me show URL")
+    MyShowsShowFetcher.run_cli(url_help="MyShows.me show URL")
 
 
 if __name__ == "__main__":
