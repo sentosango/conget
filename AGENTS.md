@@ -67,6 +67,7 @@
 | `conget-hh-vacancy` | HH.ru vacancy fetcher (via API) |
 | `conget-hh-employer` | HH.ru employer fetcher (via API) |
 | `conget-telegram-post` | Telegram public post fetcher |
+| `conget-myshows-movie` | MyShows.me movie fetcher (HTML parsing) |
 | `[project.entry-points."conget.fetchers"]` | Registration of third-party fetchers |
 
 ## Library API

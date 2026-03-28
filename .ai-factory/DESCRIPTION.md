@@ -13,9 +13,11 @@ Conget — простая CLI библиотека для получения в�
   - `youtube-video` — метаданные YouTube видео (yt-dlp)
   - `youtube-playlist` — метаданные YouTube плейлистов (yt-dlp)
   - `telegram-post` — посты из публичных Telegram каналов
+  - `myshows-show` — сериалы с MyShows.me через официальный API
+  - `myshows-movie` — фильмы с MyShows.me (HTML parsing)
 - **Несколько форматов вывода:** html, markdown, text, json, xmltei, csv
 - **Единая CLI:** `conget fetch/analyze/list/mcp` с автоматическим выбором фетчера
-- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`, `conget-youtube-video`, `conget-youtube-playlist`, `conget-telegram-post`
+- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`, `conget-youtube-video`, `conget-youtube-playlist`, `conget-myshows-show`, `conget-myshows-movie`, `conget-telegram-post`
 - **MCP сервер:** интеграция с AI-агентами через Model Context Protocol (stdio transport)
 - **Плагины сторонних разработчиков:** через Python entry-points
 - **Централизованная конфигурация:** `~/.config/conget/config.toml` с автосозданием
@@ -82,7 +84,9 @@ Conget — простая CLI библиотека для получения в�
 │       ├── hh_employer.py    # HHEmployerFetcher + CLI
 │       ├── youtube_video.py  # YoutubeVideoFetcher + CLI
 │       ├── youtube_playlist.py # YoutubePlaylistFetcher + CLI
-│       └── telegram_post.py  # TelegramPostFetcher + CLI
+│       ├── telegram_post.py  # TelegramPostFetcher + CLI
+│       ├── myshows_show.py   # MyShowsShowFetcher + CLI
+│       └── myshows_movie.py  # MyShowsMovieFetcher + CLI
 ```
 
 ### Фетчеры
@@ -130,6 +134,20 @@ Conget — простая CLI библиотека для получения в�
 - Извлекает: author, channel, post_id, date, text с форматированием и ссылками
 - Использует embed API без аутентификации
 - Опции: include_links
+
+#### MyShowsShowFetcher
+- Обрабатывает MyShows.me сериалы (https://myshows.me/view/{id})
+- Форматы: markdown, text, json
+- Использует официальный JSON-RPC API
+- Извлекает: title, status, year, country, network, ratings (MyShows, IMDb, Кинопоиск), episodes
+- Опции: timeout
+
+#### MyShowsMovieFetcher
+- Обрабатывает MyShows.me фильмы (https://myshows.me/movie/{id})
+- Форматы: markdown, text, json
+- Парсит HTML страницу (JSON-LD + description)
+- Извлекает: title, image, duration, date_published, genres, actors, country, rating, description
+- Опции: timeout
 
 ### Exceptions
 - `CongetError` — базовый класс для всех ошибок

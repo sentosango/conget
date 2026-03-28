@@ -87,6 +87,9 @@ conget-hh-employer https://hh.ru/employer/123456
 # MyShows сериалы
 conget-myshows-show https://myshows.me/view/70013/
 
+# MyShows фильмы
+conget-myshows-movie https://myshows.me/movie/331468/
+
 # Telegram посты
 conget-telegram-post https://t.me/durov/352
 ```
@@ -186,9 +189,9 @@ timeout = 30               # Таймаут запросов (секунды)
 | Формат | Описание | Поддержка по фетчерам |
 |---------|-----------|----------------------|
 | html | Исходный HTML | default |
-| markdown | Markdown формат | default, github-repo, hh-vacancy, hh-employer, myshows-show, telegram-post |
-| text | Чистый текст без форматирования | default, github-repo, hh-vacancy, hh-employer, myshows-show, telegram-post |
-| json | JSON структура | default, github-repo, hh-vacancy, hh-employer, myshows-show, telegram-post |
+| markdown | Markdown формат | default, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
+| text | Чистый текст без форматирования | default, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
+| json | JSON структура | default, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
 | xmltei | XML TEI формат | default |
 | csv | CSV формат | default |
 
