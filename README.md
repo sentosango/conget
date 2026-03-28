@@ -38,6 +38,7 @@ conget https://example.com
 conget https://github.com/user/repo
 conget https://hh.ru/vacancy/123456
 conget https://myshows.me/view/70013/
+conget https://t.me/durov/352
 
 # С указанием формата
 conget https://example.com --format markdown
@@ -85,6 +86,9 @@ conget-hh-employer https://hh.ru/employer/123456
 
 # MyShows сериалы
 conget-myshows-show https://myshows.me/view/70013/
+
+# Telegram посты
+conget-telegram-post https://t.me/durov/352
 ```
 
 ### Library API
@@ -182,9 +186,9 @@ timeout = 30               # Таймаут запросов (секунды)
 | Формат | Описание | Поддержка по фетчерам |
 |---------|-----------|----------------------|
 | html | Исходный HTML | default |
-| markdown | Markdown формат | default, github-repo, hh-vacancy, hh-employer, myshows-show |
-| text | Чистый текст без форматирования | default, github-repo, hh-vacancy, hh-employer, myshows-show |
-| json | JSON структура | default, github-repo, hh-vacancy, hh-employer, myshows-show |
+| markdown | Markdown формат | default, github-repo, hh-vacancy, hh-employer, myshows-show, telegram-post |
+| text | Чистый текст без форматирования | default, github-repo, hh-vacancy, hh-employer, myshows-show, telegram-post |
+| json | JSON структура | default, github-repo, hh-vacancy, hh-employer, myshows-show, telegram-post |
 | xmltei | XML TEI формат | default |
 | csv | CSV формат | default |
 

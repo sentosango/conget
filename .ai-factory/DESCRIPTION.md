@@ -12,9 +12,10 @@ Conget — простая CLI библиотека для получения в�
   - `hh-employer` — информация о работодателях с HH.ru
   - `youtube-video` — метаданные YouTube видео (yt-dlp)
   - `youtube-playlist` — метаданные YouTube плейлистов (yt-dlp)
+  - `telegram-post` — посты из публичных Telegram каналов
 - **Несколько форматов вывода:** html, markdown, text, json, xmltei, csv
 - **Единая CLI:** `conget fetch/analyze/list/mcp` с автоматическим выбором фетчера
-- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`, `conget-youtube-video`, `conget-youtube-playlist`
+- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`, `conget-youtube-video`, `conget-youtube-playlist`, `conget-telegram-post`
 - **MCP сервер:** интеграция с AI-агентами через Model Context Protocol (stdio transport)
 - **Плагины сторонних разработчиков:** через Python entry-points
 - **Централизованная конфигурация:** `~/.config/conget/config.toml` с автосозданием
@@ -80,7 +81,8 @@ Conget — простая CLI библиотека для получения в�
 │       ├── hh_vacancy.py     # HHVacancyFetcher + CLI
 │       ├── hh_employer.py    # HHEmployerFetcher + CLI
 │       ├── youtube_video.py  # YoutubeVideoFetcher + CLI
-│       └── youtube_playlist.py # YoutubePlaylistFetcher + CLI
+│       ├── youtube_playlist.py # YoutubePlaylistFetcher + CLI
+│       └── telegram_post.py  # TelegramPostFetcher + CLI
 ```
 
 ### Фетчеры
@@ -121,6 +123,13 @@ Conget — простая CLI библиотека для получения в�
 - Извлекает метаданные плейлиста: id, url, title, description, channel, channel_url, video_count, videos (список с id, title, url, duration)
 - Использует yt-dlp без скачивания видео (extract_flat='in_playlist' для быстрого получения списка)
 - Опции: lang (язык метаданных, по умолчанию "ru"), with_list (включать ли список видео, по умолчанию True)
+
+#### TelegramPostFetcher
+- Обрабатывает Telegram посты в публичных каналах (https://t.me/channel/post_id)
+- Форматы: markdown, text, json
+- Извлекает: author, channel, post_id, date, text с форматированием и ссылками
+- Использует embed API без аутентификации
+- Опции: include_links
 
 ### Exceptions
 - `CongetError` — базовый класс для всех ошибок

@@ -28,6 +28,7 @@ conget-youtube-video = "src.fetchers.youtube_video:cli"
 conget-youtube-playlist = "src.fetchers.youtube_playlist:cli"
 conget-myshows-show = "src.fetchers.myshows_show:cli"
 conget-default-md = "src.fetchers.default_md:cli"
+conget-telegram-post = "src.fetchers.telegram_post:cli"
 
 # Fetcher entry points (for plugins)
 [project.entry-points."conget.fetchers"]
@@ -39,6 +40,7 @@ hh-employer = "src.fetchers.hh_employer:HHEmployerFetcher"
 youtube-video = "src.fetchers.youtube_video:YoutubeVideoFetcher"
 youtube-playlist = "src.fetchers.youtube_playlist:YoutubePlaylistFetcher"
 myshows-show = "src.fetchers.myshows_show:MyShowsShowFetcher"
+telegram-post = "src.fetchers.telegram_post:TelegramPostFetcher"
 
 [build-system]
 requires = ["hatchling"]

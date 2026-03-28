@@ -53,7 +53,8 @@
             ├── default.py        # DefaultFetcher (trafilatura)
             ├── github_repo.py    # GitHubRepoFetcher
             ├── hh_vacancy.py    # HHVacancyFetcher
-            └── hh_employer.py   # HHEmployerFetcher
+            ├── hh_employer.py   # HHEmployerFetcher
+            └── telegram_post.py # TelegramPostFetcher
 ```
 
 ## Key Entry Points
@@ -65,6 +66,7 @@
 | `conget-github-repo` | GitHub repository fetcher (README.md) |
 | `conget-hh-vacancy` | HH.ru vacancy fetcher (via API) |
 | `conget-hh-employer` | HH.ru employer fetcher (via API) |
+| `conget-telegram-post` | Telegram public post fetcher |
 | `[project.entry-points."conget.fetchers"]` | Registration of third-party fetchers |
 
 ## Library API
