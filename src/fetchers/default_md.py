@@ -6,6 +6,7 @@ directly from URLs ending with .md extension.
 
 import logging
 import re
+from email.message import EmailMessage
 from typing import Any, Dict
 
 import requests
@@ -18,6 +19,9 @@ logger = logging.getLogger(__name__)
 
 # Pattern for markdown file URLs
 MD_URL_PATTERN = re.compile(r"\.md$", re.IGNORECASE)
+
+# Acceptable Content-Type values for markdown files
+MD_CONTENT_TYPES = ("text/markdown", "text/plain", "text/x-markdown")
 
 
 class DefaultMdFetcher(BaseFetcher):
@@ -48,13 +52,29 @@ class DefaultMdFetcher(BaseFetcher):
     def can_fetch(self, url: str) -> bool:
         """Check if this fetcher can handle the URL.
 
+        First checks if the URL ends with .md extension, then verifies
+        that the server returns a text/markdown or text/plain content type
+        via a HEAD request.
+
         Args:
             url: The URL to check
 
         Returns:
-            True if URL ends with .md extension
+            True if URL ends with .md extension and content type is acceptable
         """
-        return bool(MD_URL_PATTERN.search(url))
+        if not MD_URL_PATTERN.search(url):
+            return False
+
+        try:
+            response = requests.head(url, timeout=10, allow_redirects=True)
+            response.raise_for_status()
+            content_type = response.headers.get("Content-Type", "")
+            # Using EmailMessage for more precise MIME type detection than substring matching.
+            msg = EmailMessage()
+            msg["Content-Type"] = content_type
+            return msg.get_content_type() in MD_CONTENT_TYPES
+        except requests.RequestException:
+            return False
 
     def fetch(
         self, url: str, output_format: str, fetch_options: Dict[str, Any] | None = None
