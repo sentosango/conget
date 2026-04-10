@@ -45,7 +45,7 @@ conget https://example.com --format markdown
 conget https://example.com --format json
 
 # С указанием конкретного фетчера
-conget https://example.com --fetcher default
+conget https://example.com --fetcher default-trafilatura
 
 # Подробный лог
 conget https://example.com --verbose
@@ -73,7 +73,7 @@ conget mcp
 
 ```bash
 # Универсальный фетчер
-conget-default https://example.com --format markdown
+conget-default-trafilatura https://example.com --format markdown
 
 # GitHub репозитории
 conget-github-repo https://github.com/user/repo
@@ -147,10 +147,10 @@ default_format = "markdown"  # Формат по умолчанию
 
 ### Настройки фетчеров
 
-#### Default fetcher (trafilatura)
+#### Default trafilatura fetcher
 
 ```toml
-[default]
+[default-trafilatura]
 include_comments = true      # Включать комментарии
 include_tables = true        # Включать таблицы
 include_images = true        # Включать изображения
@@ -188,12 +188,12 @@ timeout = 30               # Таймаут запросов (секунды)
 
 | Формат | Описание | Поддержка по фетчерам |
 |---------|-----------|----------------------|
-| html | Исходный HTML | default |
-| markdown | Markdown формат | default, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
-| text | Чистый текст без форматирования | default, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
-| json | JSON структура | default, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
-| xmltei | XML TEI формат | default |
-| csv | CSV формат | default |
+| html | Исходный HTML | default-trafilatura |
+| markdown | Markdown формат | default-trafilatura, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
+| text | Чистый текст без форматирования | default-trafilatura, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
+| json | JSON структура | default-trafilatura, github-repo, hh-vacancy, hh-employer, myshows-show, myshows-movie, telegram-post |
+| xmltei | XML TEI формат | default-trafilatura |
+| csv | CSV формат | default-trafilatura |
 
 ## Создание собственных фетчеров
 

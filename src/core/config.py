@@ -123,7 +123,7 @@ def get_section_config(section: str) -> Dict[str, Any]:
     """Get configuration for a specific section.
 
     Args:
-        section: Section name (e.g., 'default', 'github-repo', 'hh-vacancy').
+        section: Section name (e.g., 'default-trafilatura', 'github-repo', 'hh-vacancy').
 
     Returns:
         Configuration dictionary for the section.

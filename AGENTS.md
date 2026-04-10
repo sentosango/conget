@@ -10,7 +10,7 @@
 - **Installation:** `uv tool install .` from project root
 - **Dependency Manager:** uv
 - **Package Manager:** `conget/pyproject.toml` (hatchling build backend)
-- **Content Extraction:** trafilatura (default fetcher)
+- **Content Extraction:** trafilatura (default-trafilatura fetcher)
 - **MCP Protocol:** mcp (stdio transport)
 - **Config Format:** TOML (tomlkit)
 - **HTTP Client:** requests, trafilatura
@@ -50,7 +50,7 @@
         │
         └── fetchers/            # Fetcher implementations (flat structure)
             ├── __init__.py
-            ├── default.py        # DefaultFetcher (trafilatura)
+            ├── default_trafilatura.py  # DefaultTrafilaturaFetcher (trafilatura)
             ├── github_repo.py    # GitHubRepoFetcher
             ├── hh_vacancy.py    # HHVacancyFetcher
             ├── hh_employer.py   # HHEmployerFetcher
@@ -62,7 +62,7 @@
 | Entry Point | Purpose |
 |-------------|---------|
 | `conget` | Main CLI with commands: fetch/analyze/list/mcp |
-| `conget-default` | Generic web content fetcher (trafilatura) |
+| `conget-default-trafilatura` | Generic web content fetcher (trafilatura) |
 | `conget-github-repo` | GitHub repository fetcher (README.md) |
 | `conget-hh-vacancy` | HH.ru vacancy fetcher (via API) |
 | `conget-hh-employer` | HH.ru employer fetcher (via API) |

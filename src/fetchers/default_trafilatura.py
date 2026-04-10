@@ -1,6 +1,6 @@
-"""Default fetcher using trafilatura.
+"""Default trafilatura fetcher for generic web content extraction.
 
-This module provides the DefaultFetcher class for generic web content extraction.
+This module provides the DefaultTrafilaturaFetcher class using trafilatura library.
 """
 
 import json
@@ -16,17 +16,14 @@ from src.core.types import ConfigOption, FetcherMetadata, FetchResult
 logger = logging.getLogger(__name__)
 
 
-class DefaultFetcher(BaseFetcher):
-    """Generic fetcher using trafilatura for web content extraction.
-
-    This fetcher can handle most web URLs and extracts content in various formats.
-    """
+class DefaultTrafilaturaFetcher(BaseFetcher):
+    """Generic fetcher using trafilatura for web content extraction."""
 
     @property
     def metadata(self) -> FetcherMetadata:
         """Return fetcher metadata with all configuration options."""
         return FetcherMetadata(
-            name="default",
+            name="default-trafilatura",
             description="Generic web content fetcher using trafilatura",
             is_special=False,
             supported_formats=["html", "markdown", "text", "xmltei", "json", "csv"],
@@ -62,13 +59,7 @@ class DefaultFetcher(BaseFetcher):
     def can_fetch(self, url: str) -> bool:
         """Check if this fetcher can handle the URL.
 
-        The default fetcher can handle any URL.
-
-        Args:
-            url: The URL to check
-
-        Returns:
-            Always returns True
+        The trafilatura fetcher can handle any URL.
         """
         return True
 
@@ -187,7 +178,7 @@ class DefaultFetcher(BaseFetcher):
 
 def cli():
     """Entry point for console script."""
-    DefaultFetcher.run_cli()
+    DefaultTrafilaturaFetcher.run_cli()
 
 
 if __name__ == "__main__":

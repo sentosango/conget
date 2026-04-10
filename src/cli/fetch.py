@@ -42,7 +42,7 @@ def select_best_fetcher(
 
     Priority:
     1. Specialized fetchers that can handle the URL
-    2. Generic (default) fetcher
+    2. Generic fetchers (default-defuddle, then default-trafilatura)
     3. First available fetcher
 
     Args:
@@ -67,9 +67,9 @@ def select_best_fetcher(
                 logger.debug(f"Selected specialized fetcher: {name}")
                 return name
 
-    # Try non-special fetchers that can handle the URL (except "default" and "default-defuddle")
+    # Try non-special fetchers that can handle the URL (except fallbacks)
     for name, cls in fetchers.items():
-        if name in ("default", "default-defuddle"):
+        if name in ("default-trafilatura", "default-defuddle"):
             continue
         fetcher = cls()
         if not fetcher.metadata.is_special and fetcher.can_fetch(url):
@@ -80,15 +80,15 @@ def select_best_fetcher(
                 logger.debug(f"Selected non-special fetcher: {name}")
                 return name
 
-    # Fall back to generic fetcher (trafilatura)
-    if "default" in fetchers:
-        logger.debug("Selected default fetcher")
-        return "default"
-
-    # Fall back to defuddle fetcher
+    # Fall back to defuddle fetcher (preferred generic fallback)
     if "default-defuddle" in fetchers:
         logger.debug("Selected default-defuddle fetcher")
         return "default-defuddle"
+
+    # Fall back to trafilatura fetcher
+    if "default-trafilatura" in fetchers:
+        logger.debug("Selected default-trafilatura fetcher")
+        return "default-trafilatura"
 
     # Fall back to first available fetcher
     first_name = next(iter(fetchers))

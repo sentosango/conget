@@ -20,7 +20,7 @@ dependencies = [
 conget = "src.cli.main:main_entry"
 
 # Specialized fetcher CLIs (run directly from fetcher modules)
-conget-default = "src.fetchers.default:cli"
+conget-default-trafilatura = "src.fetchers.default_trafilatura:cli"
 conget-github-repo = "src.fetchers.github_repo:cli"
 conget-hh-vacancy = "src.fetchers.hh_vacancy:cli"
 conget-hh-employer = "src.fetchers.hh_employer:cli"
@@ -34,7 +34,7 @@ conget-telegram-post = "src.fetchers.telegram_post:cli"
 
 # Fetcher entry points (for plugins)
 [project.entry-points."conget.fetchers"]
-default = "src.fetchers.default:DefaultFetcher"
+default-trafilatura = "src.fetchers.default_trafilatura:DefaultTrafilaturaFetcher"
 default-md = "src.fetchers.default_md:DefaultMdFetcher"
 github-repo = "src.fetchers.github_repo:GitHubRepoFetcher"
 hh-vacancy = "src.fetchers.hh_vacancy:HHVacancyFetcher"
