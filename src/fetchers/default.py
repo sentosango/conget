@@ -3,6 +3,7 @@
 This module provides the DefaultFetcher class for generic web content extraction.
 """
 
+import json
 import logging
 from typing import Any, Dict
 
@@ -50,6 +51,10 @@ class DefaultFetcher(BaseFetcher):
                 ),
                 "no_ssl": ConfigOption(
                     default=False, description="Disable SSL verification"
+                ),
+                "only_metadata": ConfigOption(
+                    default=False,
+                    description="Return only frontmatter without content",
                 ),
             },
         )
@@ -105,6 +110,13 @@ class DefaultFetcher(BaseFetcher):
             "text": "txt",  # trafilatura uses 'txt', we expose 'text'
         }.get(output_format, output_format)
 
+        only_metadata = fetch_options.get("only_metadata", False) if fetch_options else False
+
+        # When only_metadata is requested, always extract with metadata to get frontmatter
+        with_metadata = (
+            fetch_options.get("with_metadata", True) if fetch_options else True
+        ) or only_metadata
+
         content = trafilatura.extract(
             downloaded,
             output_format=trafilatura_format,
@@ -123,17 +135,54 @@ class DefaultFetcher(BaseFetcher):
             include_links=fetch_options.get("include_links", True)
             if fetch_options
             else True,
-            with_metadata=fetch_options.get("with_metadata", True)
-            if fetch_options
-            else True,
+            with_metadata=with_metadata,
         )
 
+        # Extract only metadata if only_metadata is requested
+        if only_metadata and content:
+            if output_format == "json":
+                # Remove content-bearing fields from JSON output
+                try:
+                    data = json.loads(content)
+                    for key in ("raw_text", "text", "comments"):
+                        data.pop(key, None)
+                    content = json.dumps(data, ensure_ascii=False, indent=2)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+            else:
+                frontmatter = self._extract_frontmatter(content)
+                if frontmatter:
+                    content = frontmatter
+
         return FetchResult(
-            content=content,
+            content=content or "",
             url=url,
             output_format=output_format,
             fetcher_name=self.metadata.name,
         )
+
+    @staticmethod
+    def _extract_frontmatter(content: str) -> str | None:
+        """Extract YAML frontmatter from trafilatura output.
+
+        Trafilatura with with_metadata=True outputs YAML frontmatter
+        between --- delimiters.
+
+        Args:
+            content: Full trafilatura output with metadata
+
+        Returns:
+            Frontmatter string (including --- delimiters) or None
+        """
+        if not content.startswith("---"):
+            return None
+
+        # Find the closing ---
+        end = content.find("---", 3)
+        if end == -1:
+            return None
+
+        return content[: end + 3]
 
 
 def cli():
