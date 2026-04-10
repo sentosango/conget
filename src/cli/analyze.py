@@ -53,14 +53,17 @@ def analyze(
 
         # Sort matches to match fetch selection logic:
         # 1. Special fetchers that can_fetch
-        # 2. Non-special fetchers that can_fetch (except "default")
+        # 2. Non-special fetchers that can_fetch (except "default" and "default-defuddle")
         # 3. "default" fetcher
+        # 4. "default-defuddle" fetcher
         # Within each group, sort alphabetically by name
         def sort_key(m: FetcherMatch) -> tuple[int, str]:
             if m.is_special:
                 return (0, m.name)
             elif m.name == "default":
                 return (2, m.name)
+            elif m.name == "default-defuddle":
+                return (3, m.name)
             else:
                 return (1, m.name)
 

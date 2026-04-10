@@ -7,6 +7,7 @@ Conget — простая CLI библиотека для получения в�
 
 - **Множество фетчеров:**
   - `default` — универсальный фетчер для любых веб-страниц (trafilatura)
+  - `default-defuddle` — универсальный фетчер для любых веб-страниц (defuddle CLI, fallback после default)
   - `github-repo` — README.md из GitHub репозиториев
   - `hh-vacancy` — вакансии с HH.ru через официальный API
   - `hh-employer` — информация о работодателях с HH.ru
@@ -17,7 +18,7 @@ Conget — простая CLI библиотека для получения в�
   - `myshows-movie` — фильмы с MyShows.me (HTML parsing)
 - **Несколько форматов вывода:** html, markdown, text, json, xmltei, csv
 - **Единая CLI:** `conget fetch/analyze/list/mcp` с автоматическим выбором фетчера
-- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`, `conget-youtube-video`, `conget-youtube-playlist`, `conget-myshows-show`, `conget-myshows-movie`, `conget-telegram-post`
+- **Специализированные CLI:** `conget-default`, `conget-github-repo`, `conget-hh-vacancy`, `conget-hh-employer`, `conget-youtube-video`, `conget-youtube-playlist`, `conget-myshows-show`, `conget-myshows-movie`, `conget-default-md`, `conget-default-defuddle`, `conget-telegram-post`
 - **MCP сервер:** интеграция с AI-агентами через Model Context Protocol (stdio transport)
 - **Плагины сторонних разработчиков:** через Python entry-points
 - **Централизованная конфигурация:** `~/.config/conget/config.toml` с автосозданием
@@ -79,6 +80,7 @@ Conget — простая CLI библиотека для получения в�
 │   │
 │   └── fetchers/             # Реализация фетчеров (flat structure)
 │       ├── default.py         # DefaultFetcher + CLI
+│       ├── default_defuddle.py # DefaultDefuddleFetcher + CLI (defuddle)
 │       ├── github_repo.py     # GitHubRepoFetcher + CLI
 │       ├── hh_vacancy.py     # HHVacancyFetcher + CLI
 │       ├── hh_employer.py    # HHEmployerFetcher + CLI
@@ -95,6 +97,13 @@ Conget — простая CLI библиотека для получения в�
 - Обрабатывает любые URL
 - Форматы: html, markdown, text, xmltei, json, csv
 - Опции конфигурации: include_comments, include_tables, include_images, include_formatting, include_links, with_metadata, no_ssl
+
+#### DefaultDefuddleFetcher
+- Обрабатывает любые URL (fallback после default)
+- Форматы: markdown, text, json
+- Использует defuddle CLI (`npx defuddle parse <url> --json --markdown`)
+- Извлекает: title, author, published, domain, site, description, wordCount, content (markdown)
+- Опции: timeout, no_ssl
 
 #### GitHubRepoFetcher
 - Обрабатывает GitHub репозитории (https://github.com/owner/repo)

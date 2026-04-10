@@ -29,6 +29,7 @@ conget-youtube-playlist = "src.fetchers.youtube_playlist:cli"
 conget-myshows-show = "src.fetchers.myshows_show:cli"
 conget-myshows-movie = "src.fetchers.myshows_movie:cli"
 conget-default-md = "src.fetchers.default_md:cli"
+conget-default-defuddle = "src.fetchers.default_defuddle:cli"
 conget-telegram-post = "src.fetchers.telegram_post:cli"
 
 # Fetcher entry points (for plugins)
@@ -43,6 +44,7 @@ youtube-playlist = "src.fetchers.youtube_playlist:YoutubePlaylistFetcher"
 myshows-show = "src.fetchers.myshows_show:MyShowsShowFetcher"
 myshows-movie = "src.fetchers.myshows_movie:MyShowsMovieFetcher"
 telegram-post = "src.fetchers.telegram_post:TelegramPostFetcher"
+default-defuddle = "src.fetchers.default_defuddle:DefaultDefuddleFetcher"
 
 [build-system]
 requires = ["hatchling"]

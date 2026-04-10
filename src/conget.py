@@ -106,9 +106,9 @@ class Conget:
                     logger.debug(f"Selected specialized fetcher: {name}")
                     return name
 
-        # Try non-special fetchers that can handle the URL (except "default")
+        # Try non-special fetchers that can handle the URL (except "default" and "default-defuddle")
         for name, cls in self.fetchers.items():
-            if name == "default":
+            if name in ("default", "default-defuddle"):
                 continue
             fetcher = cls()
             if not fetcher.metadata.is_special and fetcher.can_fetch(url):
@@ -116,10 +116,15 @@ class Conget:
                     logger.debug(f"Selected non-special fetcher: {name}")
                     return name
 
-        # Fall back to generic fetcher
+        # Fall back to generic fetcher (trafilatura)
         if "default" in self.fetchers:
             logger.debug("Selected default fetcher")
             return "default"
+
+        # Fall back to defuddle fetcher
+        if "default-defuddle" in self.fetchers:
+            logger.debug("Selected default-defuddle fetcher")
+            return "default-defuddle"
 
         # Fall back to first available fetcher
         first_name = next(iter(self.fetchers))
