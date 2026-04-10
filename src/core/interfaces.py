@@ -87,7 +87,7 @@ class BaseFetcher(ABC):
         """
         # Skip cache if TTL is not set
         if cache_ttl <= 0:
-            return self.fetch(url, output_format)
+            return self.fetch(url, output_format, fetch_options)
 
         cache = CacheManager(namespace=self.metadata.name)
 
@@ -104,7 +104,7 @@ class BaseFetcher(ABC):
             return cached
 
         # Perform actual fetch
-        result = self.fetch(url, output_format)
+        result = self.fetch(url, output_format, fetch_options)
 
         cache.set(cache_key, result)
         logger.debug(f"Cached result for {url}")
