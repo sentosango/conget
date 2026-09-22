@@ -22,6 +22,7 @@
 ├── README.md                       # User documentation
 ├── AGENTS.md                       # This file — project structure map
 ├── pyproject.toml                  # Project config (metadata, dependencies, entry points)
+├── justfile                        # CLI installation commands and help
 │
 ├── .ai-factory/                   # AI context
 │   ├── DESCRIPTION.md               # Project specification
